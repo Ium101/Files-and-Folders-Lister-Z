@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="9e8c9cb6-4efc-4c4f-b484-116f6f39ad9a" src="https://github.com/user-attachments/assets/c6968f79-c6a6-4267-816f-5cac0ff96a9e" />
+
 # Files & Folders Lister Z
 A Python tool to generate organized lists of files and folders in a directory, with options for DOCX or TXT or JSON output. Features include recursive listing, sorting, and customizable output formats.
 
