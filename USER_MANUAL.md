@@ -137,10 +137,10 @@ Para suporte ou mais informações, consulte o README do projeto ou entre em con
 
 ## Alternative Version (Enterprise Edition)
 
-- Do NOT include credits in the output files (TXT, DOCX, JSON).
-- (Planned in the future) Will create folders in the same structure as in the selected JSON file.
+- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
 
 ## Versão Alternativa (Versão Empresarial)
 
-- Não inclui créditos nos arquivos de saída (TXT, DOCX, JSON).
-- (Planejado no futuro) Irá criar pastas na mesma estrutura que o arquivo JSON selecionado.
+- Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
+- (Planejado no futuro) Também poderá criar pastas na mesma estrutura do arquivo JSON a ser selecionado.

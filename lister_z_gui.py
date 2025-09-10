@@ -70,7 +70,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
                     run = p.add_run(base)
                     p.add_run(ext)
             credits_p = doc.add_paragraph()
-            credits_run = credits_p.add_run("Credits: User Ium101 from GitHub and AI tools")
+            credits_run = credits_p.add_run("Credits: User Ium101 from GitHub")
             credits_run.font.size = 127000
             doc.save(output_file_path)
             messagebox.showinfo("Success", f"List generated successfully: {output_file_path}")
@@ -90,7 +90,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
             db["folders"].append(folder_to_dict(folder))
         with open(output_file_path, "w", encoding="utf-8") as json_file:
             json.dump(db, json_file, indent=2)
-            json_file.write("\n/* Credits: User Ium101 from GitHub and AI tools */\n")
+            json_file.write("\n/* Credits: User Ium101 from GitHub */\n")
         messagebox.showinfo("Success", f"JSON database exported: {output_file_path}")
     else:
         with open(output_file_path, "w", encoding="utf-8") as txt_file:
@@ -107,7 +107,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
                     for file in files:
                         base, ext = os.path.splitext(os.path.basename(file))
                         txt_file.write(f"• {base}{ext}\n")
-            txt_file.write("\n\nCredits: User Ium101 from GitHub and AI tools\n")
+            txt_file.write("\n\nCredits: User Ium101 from GitHub \n")
         messagebox.showinfo("Success", f"List generated successfully: {output_file_path}")
 
 def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
@@ -165,7 +165,7 @@ def run_gui():
             "success": "List generated successfully: {path}",
             "json_success": "JSON database exported: {path}",
             "docx_error": "DOCX generation failed: {err}",
-            "credits": "Credits: User Ium101 from GitHub and AI tools"
+            "credits": "Credits: User Ium101 from GitHub"
         },
         "pt": {
             "title": "Lister Z",
@@ -250,7 +250,7 @@ def run_gui():
                     msg = L["success"].format(path=msg.split(": ",1)[-1])
                 elif "JSON database exported:" in msg:
                     msg = L["json_success"].format(path=msg.split(": ",1)[-1])
-                elif "Credits: User Ium101 from GitHub and AI tools" in msg:
+                elif "Credits: User Ium101 from GitHub" in msg:
                     msg = L["credits"]
                 orig_showinfo(title, msg, *a, **kw)
             def lang_showerror(title, msg, *a, **kw):

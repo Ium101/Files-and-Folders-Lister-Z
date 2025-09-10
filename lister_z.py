@@ -23,7 +23,7 @@ LANGUAGES = {
         "list_generated": "The List has been generated",
         "docx_failed": "DOCX generation failed: {err}. Falling back to TXT mode.",
         "json_exported": "JSON database exported: {path}",
-        "credits": "Credits: User Ium101 from GitHub and AI tools",
+        "credits": "Credits: User Ium101 from GitHub",
         "press_any_button": "Press any button to exit"
     },
     "pt": {
@@ -45,7 +45,7 @@ LANGUAGES = {
         "list_generated": "A lista foi gerada",
         "docx_failed": "Falha ao gerar DOCX: {err}. Gerando TXT em vez disso.",
         "json_exported": "Banco de dados JSON exportado: {path}",
-        "credits": "Créditos: Usuário Ium101 do GitHub e Ferramentas IA",
+        "credits": "Créditos: Usuário Ium101 do GitHub",
         "press_any_button": "Pressione qualquer botão para sair"
     }
 }
@@ -301,7 +301,7 @@ if __name__ == "__main__":
                 msg = msg.replace("The List has been generated", L["list_generated"])
                 msg = msg.replace("DOCX generation failed:", L["docx_failed"].split(":")[0]+":")
                 msg = msg.replace("JSON database exported:", L["json_exported"].split(":")[0]+":")
-                msg = msg.replace("Credits: User Ium101 from GitHub and AI tools", L["credits"])
+                msg = msg.replace("Credits: User Ium101 from GitHub", L["credits"])
             orig_print(msg, *p_args[1:], **p_kwargs)
         builtins.print = lang_print
         try:
