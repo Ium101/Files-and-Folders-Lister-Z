@@ -72,7 +72,7 @@ Para suporte ou mais informações, entre em contato com Ium101.
 ## Alternative Version (Enterprise Edition)
 
 - Do NOT include credits in the output files (TXT, DOCX, JSON).
- (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
+- (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
 
 ## Versão Alternativa (Versão Empresarial)
 
