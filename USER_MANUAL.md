@@ -60,6 +60,12 @@ Follow the on-screen prompts to specify the folder and output options in your ch
 - For Linux, use the provided launch scripts: `run_lister_z.sh`, or `run_lister_z_gui.sh`.
 - For MacOS, use the provided launch scripts:  `Lister Z.command`, or `Lister Z GUI.command`.
 
+## Alternative Versions (Alt Folder)
+
+The Alt folder contains alternative versions of the CLI and GUI programs. These versions:
+- Do NOT include credits in the output files (TXT, DOCX, JSON).
+- 
+
 See `README.md` for more details.
 For support or more information, refer to the project README or contact Ium101.
 
@@ -128,3 +134,15 @@ Siga as instruções na tela para especificar a pasta e as opções de saída no
 
 Veja o `README.md` para mais detalhes.
 Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
+
+## Alternative Version (Enterprise Edition)
+
+The Alt folder contains alternative versions of the CLI and GUI programs. These versions:
+- Do NOT include credits in the output files (TXT, DOCX, JSON).
+- (Planned in the future) Will create folders in the same structure as in the selected JSON file.
+
+## Versão Alternativa (Versão Empresarial)
+
+A pasta Alt contém versões alternativas dos programas CLI e GUI. Essas versões:
+- Não inclui créditos nos arquivos de saída (TXT, DOCX, JSON).
+- (Planejado no futuro) Irá criar pastas na mesma estrutura que o arquivo JSON selecionado.

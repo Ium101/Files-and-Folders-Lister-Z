@@ -68,3 +68,15 @@ Python 3 é necessário para executar os scripts `.py`.
 
 Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
 Para suporte ou mais informações, entre em contato com Ium101.
+
+## Alternative Version (Enterprise Edition)
+
+The Alt folder contains alternative versions of the CLI and GUI programs. These versions:
+- Do NOT include credits in the output files (TXT, DOCX, JSON).
+- (Planned in the future) Will create folders in the same structure as in the selected JSON file.
+
+## Versão Alternativa (Versão Empresarial)
+
+A pasta Alt contém versões alternativas dos programas CLI e GUI. Essas versões:
+- Não inclui créditos nos arquivos de saída (TXT, DOCX, JSON).
+- (Planejado no futuro) Irá criar pastas na mesma estrutura que o arquivo JSON selecionado.
