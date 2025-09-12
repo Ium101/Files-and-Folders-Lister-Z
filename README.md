@@ -31,9 +31,18 @@ Both the command-line and GUI versions support English and Brazilian Portuguese.
 
 Python 3 is required to run the `.py` scripts.
 
+## Enterprise Edition
+
+- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Can create folders in the same structure as JSON file that's going to be selected.
+
 For more details and advanced options, see the `USER_MANUAL.md` file.
 For support or more information, contact Ium101.
 
+## Enterprise Edition
+
+- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Can create folders in the same structure as JSON file that's going to be selected.
 
 # Listador de Pastas e Arquivos Z
 Um utilitário Python para gerar listas organizadas de arquivos e pastas em um diretório, com opções de saída em DOCX, TXT ou JSON. Recursos incluem listagem recursiva, ordenação e formatos de saída personalizáveis.
@@ -57,24 +66,3 @@ Tanto a versão de linha de comando quanto a GUI suportam inglês e português b
     - Execute o script: `./run_lister_z_gui.sh`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
 - **Linha de Comando:** 
     - Execute o script: `./run_lister_z.sh` e siga o prompt de idioma.
-
-### MacOS
-- **GUI:**
-    - Clique duas vezes em `Lister Z GUI.command`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
-- **Linha de Comando:**
-    - Clique duas vezes em `Lister Z.command` e siga o prompt de idioma.
-
-Python 3 é necessário para executar os scripts `.py`.
-
-Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
-Para suporte ou mais informações, entre em contato com Ium101.
-
-## Alternative Version (Enterprise Edition)
-
-- Do NOT include credits in the output files (TXT / DOCX / JSON).
-- (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
-
-## Versão Alternativa (Versão Empresarial)
-
-- Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
-- (Planejado no futuro) Também poderá criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
