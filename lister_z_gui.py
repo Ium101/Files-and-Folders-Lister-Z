@@ -8,7 +8,7 @@ LANGUAGES = {
     "en": {
         "title": "Lister Z",
         "create_list": "Create a list of files and folders (English)",
-        "create_folders": "Create folder structure from JSON (English)",
+        "create_folders": "Create folder & file structure from JSON (English)",
         "select_dir": "Select a folder to list.",
         "error_dir": "The directory '{directory}' does not exist. Please select a valid folder.",
         "mode": "Do you want to generate the output as DOCX (A), TXT (B), or JSON (C)?",
@@ -20,19 +20,19 @@ LANGUAGES = {
         "json_success": "JSON database exported: {path}",
         "docx_error": "DOCX generation failed: {err}",
         "credits": "Credits: User Ium101 from GitHub",
-        "select_json": "Select the JSON file for folder creation",
+        "select_json": "Select the JSON file for structure creation",
         "no_json_selected": "Operation cancelled: No JSON file was selected.",
         "invalid_json_format": "The selected file is not a valid JSON file. Please choose a file with the correct format.",
         "select_base_dir": "Select the base folder to create the structure in",
         "no_base_dir_selected": "Operation cancelled: No base folder was selected.",
-        "folders_created": "Folder structure created successfully!",
-        "error_creating": "Error creating folders",
+        "folders_created": "Folder and file structure created successfully!",
+        "error_creating": "Error creating structure",
         "error": "Error"
     },
     "pt": {
         "title": "Lister Z",
         "create_list": "Criar uma lista de arquivos e pastas (Português)",
-        "create_folders": "Criar estrutura de pastas a partir de JSON (Português)",
+        "create_folders": "Criar estrutura de pastas e arquivos a partir de JSON (Português)",
         "select_dir": "Selecione uma pasta para listar.",
         "error_dir": "O diretório '{directory}' não existe. Por favor, selecione uma pasta válida.",
         "mode": "Deseja gerar a saída como DOCX (A), TXT (B) ou JSON (C)?",
@@ -44,32 +44,27 @@ LANGUAGES = {
         "json_success": "Banco de dados JSON exportado: {path}",
         "docx_error": "Falha ao gerar DOCX: {err}",
         "credits": "Créditos: Usuário Ium101 do GitHub",
-        "select_json": "Selecione o arquivo JSON para a criação de pastas",
+        "select_json": "Selecione o arquivo JSON para a criação da estrutura",
         "no_json_selected": "Operação cancelada: Nenhum arquivo JSON foi selecionado.",
         "invalid_json_format": "O arquivo selecionado não é um JSON válido. Por favor, escolha um arquivo com o formato correto.",
         "select_base_dir": "Selecione a pasta base para criar a estrutura",
         "no_base_dir_selected": "Operação cancelada: Nenhuma pasta base foi selecionada.",
-        "folders_created": "Estrutura de pastas criada com sucesso!",
-        "error_creating": "Erro ao criar pastas",
+        "folders_created": "Estrutura de pastas e arquivos criada com sucesso!",
+        "error_creating": "Erro ao criar a estrutura",
         "error": "Erro"
     }
 }
 
 def is_hidden_file(entry):
-    # This function is cross-platform compatible.
-    # It checks for Unix-style hidden files (starting with '.')
-    # and then tries to check for Windows hidden attributes in a try-except block.
     hidden_names = {"desktop.ini", "thumbs.db", "._.ds_store", ".ds_store", ".gitignore", ".gitkeep"}
     if entry.name.startswith('.') or entry.name.lower() in hidden_names:
         return True
     try:
-        # This will only work on Windows
         import ctypes
         attrs = ctypes.windll.kernel32.GetFileAttributesW(str(entry.path))
-        if attrs != -1 and attrs & 2:  # FILE_ATTRIBUTE_HIDDEN
+        if attrs != -1 and attrs & 2:
             return True
     except (ImportError, AttributeError):
-        # This will fail on non-Windows systems, which is expected.
         pass
     return False
 
@@ -151,96 +146,112 @@ def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
             txt_file.write(f"{'    ' * (indent + 1)}{os.path.basename(entry.name)}\n")
 
 def run_lister(root, lang_code):
-    L = LANGUAGES[lang_code]
-    dialog_root = tk.Toplevel(root)
-    dialog_root.transient(root)
-    dialog_root.grab_set()
-    dialog_root.withdraw()
+    root.withdraw()
+    try:
+        L = LANGUAGES[lang_code]
+        dialog_root = tk.Toplevel(root)
+        dialog_root.withdraw()
 
-    directory = filedialog.askdirectory(title=L["select_dir"], parent=dialog_root)
-    if not directory:
-        dialog_root.destroy()
-        return
+        directory = filedialog.askdirectory(title=L["select_dir"], parent=dialog_root)
+        if not directory:
+            dialog_root.destroy()
+            return
 
-    mode = simpledialog.askstring(L["title"], L["mode"], parent=dialog_root)
-    if mode is None:
-        dialog_root.destroy()
-        return
-    mode = mode.strip().lower()
-    if mode in ["a", "docx"]: mode = "A"
-    elif mode in ["b", "txt"]: mode = "B"
-    elif mode in ["c", "json"]: mode = "C"
-    else:
-        messagebox.showerror(L["title"], L["invalid_mode"], parent=dialog_root)
-        dialog_root.destroy()
-        return
+        mode = simpledialog.askstring(L["title"], L["mode"], parent=dialog_root)
+        if mode is None:
+            dialog_root.destroy()
+            return
+        mode = mode.strip().lower()
+        if mode in ["a", "docx"]: mode = "A"
+        elif mode in ["b", "txt"]: mode = "B"
+        elif mode in ["c", "json"]: mode = "C"
+        else:
+            messagebox.showerror(L["title"], L["invalid_mode"], parent=dialog_root)
+            dialog_root.destroy()
+            return
 
-    list_option = simpledialog.askinteger(L["title"], L["list_option"], minvalue=1, maxvalue=3, parent=dialog_root)
-    if list_option is None:
-        dialog_root.destroy()
-        return
+        list_option = simpledialog.askinteger(L["title"], L["list_option"], minvalue=1, maxvalue=3, parent=dialog_root)
+        if list_option is None:
+            dialog_root.destroy()
+            return
 
-    filter_input = simpledialog.askstring(L["title"], L["filter"], parent=dialog_root)
-    if filter_input is None:
-        dialog_root.destroy()
-        return
-    specific_subfolders = [f.strip() for f in filter_input.split(",")] if filter_input else None
+        filter_input = simpledialog.askstring(L["title"], L["filter"], parent=dialog_root)
+        if filter_input is None:
+            dialog_root.destroy()
+            return
+        specific_subfolders = [f.strip() for f in filter_input.split(",")] if filter_input else None
 
-    ignore_hidden = messagebox.askyesno(L["title"], L["hide_hidden"], parent=dialog_root)
-    if ignore_hidden is None:
-        dialog_root.destroy()
-        return
+        ignore_hidden = messagebox.askyesno(L["title"], L["hide_hidden"], parent=dialog_root)
+        if ignore_hidden is None:
+            dialog_root.destroy()
+            return
 
-    list_files_and_folders(directory, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, parent=dialog_root)
-    dialog_root.destroy()
+        list_files_and_folders(directory, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, parent=dialog_root)
+        dialog_root.destroy()
+    finally:
+        if root.winfo_exists():
+            root.deiconify()
 
 def create_folders_from_json_gui(root, lang_code):
-    L = LANGUAGES[lang_code]
-    dialog_root = tk.Toplevel(root)
-    dialog_root.transient(root)
-    dialog_root.grab_set()
-    dialog_root.withdraw()
+    root.withdraw()
+    try:
+        L = LANGUAGES[lang_code]
+        dialog_root = tk.Toplevel(root)
+        dialog_root.withdraw()
 
-    while True:
-        json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=dialog_root)
-        if not json_path:
+        while True:
+            json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=dialog_root)
+            if not json_path:
+                dialog_root.destroy()
+                return
+            try:
+                with open(json_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                break
+            except json.JSONDecodeError:
+                messagebox.showerror(L["error"], L["invalid_json_format"], parent=dialog_root)
+            except Exception as e:
+                messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
+                dialog_root.destroy()
+                return
+
+        base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=dialog_root)
+        if not base_dir:
             dialog_root.destroy()
             return
+
         try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            break
-        except json.JSONDecodeError:
-            messagebox.showerror(L["error"], L["invalid_json_format"], parent=dialog_root)
+            def create_structure(d, parent):
+                folder_name = d.get("folder", d.get("root", ""))
+                if folder_name:
+                    folder_path = os.path.join(parent, folder_name)
+                    os.makedirs(folder_path, exist_ok=True)
+
+                    for filename in d.get("files", []):
+                        if isinstance(filename, str):
+                            try:
+                                file_path = os.path.join(folder_path, filename)
+                                with open(file_path, 'w') as f:
+                                    pass
+                            except IOError as e:
+                                messagebox.showwarning("File Creation Warning", f"Could not create file {filename} in {folder_path}: {e}", parent=dialog_root)
+
+                    for subfolder in d.get("subfolders", []):
+                        create_structure(subfolder, folder_path)
+
+            if "root" in data:
+                create_structure({"folder": data["root"], "subfolders": data.get("folders", []), "files": data.get("files", [])}, base_dir)
+            else:
+                create_structure(data, base_dir)
+
+            messagebox.showinfo(L["title"], L["folders_created"], parent=dialog_root)
         except Exception as e:
             messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
-            dialog_root.destroy()
-            return
 
-    base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=dialog_root)
-    if not base_dir:
         dialog_root.destroy()
-        return
-
-    try:
-        def create_structure(d, parent):
-            folder_name = d.get("folder", d.get("root", ""))
-            if folder_name:
-                folder_path = os.path.join(parent, folder_name)
-                os.makedirs(folder_path, exist_ok=True)
-                for subfolder in d.get("subfolders", []):
-                    create_structure(subfolder, folder_path)
-
-        if "root" in data:
-            create_structure({"folder": data["root"], "subfolders": data.get("folders", [])}, base_dir)
-        else:
-            create_structure(data, base_dir)
-
-        messagebox.showinfo(L["title"], L["folders_created"], parent=dialog_root)
-    except Exception as e:
-        messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
-
-    dialog_root.destroy()
+    finally:
+        if root.winfo_exists():
+            root.deiconify()
 
 def run_gui():
     root = tk.Tk()
