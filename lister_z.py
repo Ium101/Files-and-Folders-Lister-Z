@@ -116,7 +116,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     p = doc.add_paragraph()
                     p.add_run("• ")
                     base, ext = os.path.splitext(os.path.basename(file))
-                    p.add_run(base)
+                    p.add_run(base).italic = True
                     p.add_run(ext).italic = True
 
             # Add credits at the end (small size)
@@ -197,7 +197,7 @@ def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
         elif entry.is_file() and list_option == 1:
             sub_p = doc.add_paragraph("    " * (indent + 1))
             base, ext = os.path.splitext(entry.name)
-            sub_p.add_run(base)
+            sub_p.add_run(base).italic = True
             sub_p.add_run(ext).italic = True
 
 def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
