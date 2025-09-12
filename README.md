@@ -44,6 +44,7 @@ For support or more information, contact Ium101.
 - Do NOT include credits in the output files (TXT / DOCX / JSON).
 - Can create folders in the same structure as JSON file that's going to be selected.
 
+
 # Listador de Pastas e Arquivos Z
 Um utilitário Python para gerar listas organizadas de arquivos e pastas em um diretório, com opções de saída em DOCX, TXT ou JSON. Recursos incluem listagem recursiva, ordenação e formatos de saída personalizáveis.
 
