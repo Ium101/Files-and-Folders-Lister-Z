@@ -2,6 +2,7 @@
 
 ## Overview
 Files and Folders Lister Z or simply Lister Z is a utility for listing the contents of directories on your computer. It provides both a command-line and a graphical user interface (GUI) for easy use.
+Also can create folders and empy text files in the same structure as JSON file that's going to be selected.
 
 ## How to Use
 
@@ -63,7 +64,6 @@ Follow the on-screen prompts to specify the folder and output options in your ch
 ## Enterprise Edition
 
 - Do NOT include credits in the output files (DOCX / TXT / JSON).
-- Can create folders in the same structure as JSON file that's going to be selected.
 
 See `README.md` for more details.
 For support or more information, refer to the project README or contact Ium101.
@@ -74,6 +74,7 @@ For support or more information, refer to the project README or contact Ium101.
 
 ## Visão Geral
 Listador de Pastas e Arquivos Z ou simplesmente Listador Z é um utilitário para listar o conteúdo de diretórios no seu computador. Ele oferece tanto uma interface de linha de comando quanto uma interface gráfica (GUI) para facilitar o uso.
+Também pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
 
 ## Como Usar
 
@@ -136,7 +137,6 @@ Siga as instruções na tela para especificar a pasta e as opções de saída no
 ## Versão Empresarial
 
 - Não inclui créditos nos arquivos de saída (DOCX / TXT / JSON).
-- Pode criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
 
 Veja o `README.md` para mais detalhes.
 Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
