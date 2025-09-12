@@ -1,9 +1,13 @@
 <img width="1536" height="1024" alt="9e8c9cb6-4efc-4c4f-b484-116f6f39ad9a" src="https://github.com/user-attachments/assets/c6968f79-c6a6-4267-816f-5cac0ff96a9e" />
 
 # Files & Folders Lister Z
+
 A Python tool to generate organized lists of files and folders in a directory, with options for DOCX or TXT or JSON output. Features include recursive listing, sorting, and customizable output formats.
 
+Now it also can create folders and empy text files in the same structure as JSON file that's going to be selected.
+
 ## Compatibility
+
 Files & Folders Lister Z or simply Lister Z works on **Windows**, **Linux**, and **MacOS**.
 
 ## How to Run
@@ -34,21 +38,19 @@ Python 3 is required to run the `.py` scripts.
 ## Enterprise Edition
 
 - Do NOT include credits in the output files (DOCX / TXT / JSON).
-- Can create folders and empy text files in the same structure as JSON file that's going to be selected.
 
 For more details and advanced options, see the `USER_MANUAL.md` file.
 For support or more information, contact Ium101.
 
-## Enterprise Edition
-
-- Do NOT include credits in the output files (TXT / DOCX / JSON).
-- Can create folders in the same structure as JSON file that's going to be selected.
 
 
 # Listador de Pastas e Arquivos Z
 Um utilitário Python para gerar listas organizadas de arquivos e pastas em um diretório, com opções de saída em DOCX, TXT ou JSON. Recursos incluem listagem recursiva, ordenação e formatos de saída personalizáveis.
 
+Agora também pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
+
 ## Compatibilidade
+
 Listador de Arquivos e Pastas Z, ou simplesmente Listador Z, funciona em **Windows**, **Linux** e **MacOS**.
 
 ## Como Executar
@@ -79,7 +81,6 @@ Python 3 é necessário para executar os scripts `.py`.
 ## Versão Empresarial
 
 - Não inclui créditos nos arquivos de saída (DOCX / TXT / JSON).
-- Pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
 
 Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
 Para suporte ou mais informações, entre em contato com Ium101.
