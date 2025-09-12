@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from docx import Document
+from docx.shared import Pt
 import json
 
 LANGUAGES = {
@@ -97,6 +98,11 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
                     base, ext = os.path.splitext(os.path.basename(file))
                     p.add_run(base).italic = True
                     p.add_run(ext)
+
+            credits_p = doc.add_paragraph()
+            credits_run = credits_p.add_run(L["credits"].lower())
+            credits_run.font.size = Pt(8)
+
             doc.save(output_file_path)
             messagebox.showinfo(L["title"], L["success"].format(path=output_file_path), parent=parent)
         except Exception as e:
@@ -109,6 +115,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
                 elif entry.is_dir(): d["subfolders"].append(folder_to_dict(entry.path))
             return d
         db = {"root": folder_name, "files": [os.path.basename(f) for f in files if list_option in [1, 3]], "folders": [folder_to_dict(f) for f in folders]}
+        db["_credits"] = L["credits"]
         with open(output_file_path, "w", encoding="utf-8") as json_file:
             json.dump(db, json_file, indent=2)
         messagebox.showinfo(L["title"], L["json_success"].format(path=output_file_path), parent=parent)
@@ -121,6 +128,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
             if list_option in [1, 3]:
                 for file in files:
                     txt_file.write(f"• {os.path.basename(file)}\n")
+            txt_file.write(f"\n\n{L['credits']}")
         messagebox.showinfo(L["title"], L["success"].format(path=output_file_path), parent=parent)
 
 def write_folder_structure_docx(doc, folder, indent=0, list_option=1):

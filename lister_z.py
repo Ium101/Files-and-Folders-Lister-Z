@@ -1,6 +1,7 @@
 import os
 import json
 from docx import Document
+from docx.shared import Pt
 
 # Language dictionaries
 LANGUAGES = {
@@ -77,7 +78,6 @@ def get_lang():
             print("Invalid input. Please enter 1 or 2. / Entrada inválida. Por favor, insira 1 ou 2.")
 
 def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, specific_subfolders=None, ignore_hidden=False, L=None, lang='en'):
-    # This function remains unchanged for now
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
     output_filename_base = f"{folder_name} ({disk_letter})"
@@ -88,19 +88,13 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
         if ignore_hidden and is_hidden_file(entry):
             continue
         if entry.is_dir():
-            if not specific_subfolders:
+            if not specific_subfolders or any(re.sub(r'\W+', '', sub).lower() in re.sub(r'\W+', '', entry.name).lower() for sub in specific_subfolders):
                 folders.append(entry.path)
-            else:
-                entry_name_clean = re.sub(r'\W+', '', entry.name).lower()
-                for sub in specific_subfolders:
-                    sub_clean = re.sub(r'\W+', '', sub).lower()
-                    if sub_clean == entry_name_clean:
-                        folders.append(entry.path)
-                        break
         elif entry.is_file():
             files.append(entry.path)
+
     output_file_path = os.path.join(directory, f"{output_filename_base}.{'docx' if mode.upper() == 'A' else ('json' if mode.upper() == 'C' else 'txt')}")
-    credits_str = L["credits"]
+
     if mode.upper() == "A":
         try:
             doc = Document()
@@ -110,32 +104,35 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     write_folder_structure_docx(doc, folder, list_option=list_option)
             if list_option == 1:
                 for file in files:
-                    p = doc.add_paragraph()
-                    p.add_run("• ")
+                    p = doc.add_paragraph("• ")
                     base, ext = os.path.splitext(os.path.basename(file))
-                    p.add_run(base)
+                    p.add_run(base).italic = True
                     p.add_run(ext)
+
+            # Add credits
+            credits_p = doc.add_paragraph()
+            credits_run = credits_p.add_run(L["credits"].lower())
+            credits_run.font.size = Pt(8)
+
             doc.save(output_file_path)
             print(L["list_success"].format(path=output_file_path))
-            print(L["list_generated"])
         except Exception as e:
             print(L["docx_failed"].format(err=e))
-            # Fallback to TXT
+            # Fallback to TXT is complex here, so we just report the error.
+
     elif mode.upper() == "C":
-        def folder_to_dict(folder):
-            d = {"folder": os.path.basename(folder), "files": [], "subfolders": []}
-            for entry in os.scandir(folder):
-                if entry.is_file():
-                    d["files"].append(entry.name)
-                elif entry.is_dir():
-                    d["subfolders"].append(folder_to_dict(entry.path))
+        def folder_to_dict(path):
+            d = {"folder": os.path.basename(path), "files": [], "subfolders": []}
+            for entry in os.scandir(path):
+                if entry.is_file(): d["files"].append(entry.name)
+                elif entry.is_dir(): d["subfolders"].append(folder_to_dict(entry.path))
             return d
-        db = {"root": folder_name, "files": [os.path.basename(f) for f in files] if list_option in [1, 3] else [], "folders": []}
-        for folder in folders:
-            db["folders"].append(folder_to_dict(folder))
+        db = {"root": folder_name, "files": [os.path.basename(f) for f in files if list_option in [1, 3]], "folders": [folder_to_dict(f) for f in folders]}
+        db["_credits"] = L["credits"]
         with open(output_file_path, "w", encoding="utf-8") as json_file:
             json.dump(db, json_file, indent=2)
         print(L["json_exported"].format(path=output_file_path))
+
     else: # TXT mode
         with open(output_file_path, "w", encoding="utf-8") as txt_file:
             txt_file.write(f"{folder_name}\n\n")
@@ -145,15 +142,30 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
             if list_option in [1, 3]:
                 for file in files:
                     txt_file.write(f"• {os.path.basename(file)}\n")
+            txt_file.write(f"\n\n{L['credits']}")
         print(L["list_success"].format(path=output_file_path))
 
 def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
-    # This function remains unchanged
-    pass
+    p = doc.add_paragraph("    " * indent + "• ")
+    p.add_run(os.path.basename(folder)).bold = True
+    entries = sorted(os.scandir(folder), key=lambda e: (not e.is_dir(), e.name.lower()))
+    for entry in entries:
+        if entry.is_dir():
+            write_folder_structure_docx(doc, entry.path, indent + 1, list_option)
+        elif entry.is_file() and list_option == 1:
+            sub_p = doc.add_paragraph("    " * (indent + 1))
+            base, ext = os.path.splitext(entry.name)
+            sub_p.add_run(base).italic = True
+            sub_p.add_run(ext)
 
 def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
-    # This function remains unchanged
-    pass
+    txt_file.write(f"{'    ' * indent}• {os.path.basename(folder)}\n")
+    entries = sorted(os.scandir(folder), key=lambda e: (not e.is_dir(), e.name.lower()))
+    for entry in entries:
+        if entry.is_dir():
+            write_folder_structure_txt(txt_file, entry.path, indent + 1, list_option)
+        elif entry.is_file() and list_option == 1:
+            txt_file.write(f"{'    ' * (indent + 1)}{os.path.basename(entry.name)}\n")
 
 def is_hidden_file(entry):
     hidden_names = {"desktop.ini", "thumbs.db", "._.ds_store", ".ds_store", ".gitignore", ".gitkeep"}
@@ -188,26 +200,20 @@ def create_folders_from_json_cli(json_path, base_dir, L):
             folder_path = os.path.join(parent, folder_name)
             os.makedirs(folder_path, exist_ok=True)
 
-            # Create empty text files
             for filename in d.get("files", []):
                 if isinstance(filename, str):
                     try:
                         file_path = os.path.join(folder_path, filename)
-                        with open(file_path, 'w') as f:
-                            pass  # Create an empty file
+                        with open(file_path, 'w') as f: pass
                     except IOError as e:
                         print(f"Warning: Could not create file {filename} in {folder_path}: {e}")
 
-            # Recurse for subfolders
             for subfolder in d.get("subfolders", []):
                 create_structure(subfolder, folder_path)
 
         if "root" in data:
-            # Handle the structure where 'root' is the top-level key
-            root_dict = {"folder": data["root"], "subfolders": data.get("folders", []), "files": data.get("files", [])}
-            create_structure(root_dict, base_dir)
+            create_structure({"folder": data["root"], "subfolders": data.get("folders", []), "files": data.get("files", [])}, base_dir)
         else:
-            # Handle the case where the root object is just the first dictionary
             create_structure(data, base_dir)
 
         print(L["folders_created_successfully"])
@@ -217,12 +223,57 @@ def create_folders_from_json_cli(json_path, base_dir, L):
         return False
 
 def run_create_list(L, lang):
-    # This function remains unchanged
-    pass
+    while True:
+        directory_to_list = input(L["enter_directory"])
+        if not os.path.isdir(directory_to_list):
+            print(L["error_directory"].format(dir=directory_to_list))
+        else:
+            break
+    hide_hidden_input = input(L["hide_hidden"]).strip().lower()
+    ignore_hidden = hide_hidden_input in (["yes", "y"] if lang == "en" else ["sim", "s"])
+    filter_input = input(L["filter_input"]).strip()
+    specific_subfolders = [folder.strip() for folder in filter_input.split(",")] if filter_input else None
+
+    while True:
+        mode = input(L["output_mode"]).strip().lower()
+        if mode in ("a", "docx"): mode = "A"; break
+        if mode in ("b", "txt"): mode = "B"; break
+        if mode in ("c", "json"): mode = "C"; break
+        print(L["invalid_mode"])
+
+    while True:
+        try:
+            print(L["choose_option"])
+            print(L["option_1"])
+            print(L["option_2"])
+            print(L["option_3"])
+            choice = input(L["enter_choice"])
+            list_option = int(choice)
+            if list_option in [1, 2, 3]:
+                break
+            else:
+                print(L["invalid_choice"])
+        except ValueError:
+            print(L["invalid_number"])
+
+    list_files_and_folders(directory_to_list, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, lang=lang)
 
 def run_create_folders(L):
-    # This function remains unchanged
-    pass
+    while True:
+        json_path = input(L["enter_json_path"]).strip()
+        if os.path.isfile(json_path):
+            break
+        else:
+            print(L["error_json_path"].format(path=json_path))
+
+    while True:
+        base_dir = input(L["enter_base_dir"]).strip()
+        if os.path.isdir(base_dir):
+            break
+        else:
+            print(L["error_directory"].format(dir=base_dir))
+
+    create_folders_from_json_cli(json_path, base_dir, L)
 
 if __name__ == "__main__":
     lang = get_lang()
