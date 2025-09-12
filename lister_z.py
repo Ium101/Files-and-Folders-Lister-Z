@@ -106,7 +106,8 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
     if mode.upper() == "A":  # DOCX
         try:
             doc = Document()
-            doc.add_heading(f"{folder_name}", level=1)
+            heading_paragraph = doc.add_heading(f"{folder_name}", level=1)
+            heading_paragraph.paragraph_format.space_after = Pt(12)
             if list_option in [1, 2]:
                 for folder in folders:
                     write_folder_structure_docx(doc, folder, list_option=list_option)
@@ -116,7 +117,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     p.add_run("• ")
                     base, ext = os.path.splitext(os.path.basename(file))
                     p.add_run(base)
-                    p.add_run(ext)
+                    p.add_run(ext).italic = True
 
             # Add credits at the end (small size)
             p_credits = doc.add_paragraph()
@@ -196,9 +197,8 @@ def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
         elif entry.is_file() and list_option == 1:
             sub_p = doc.add_paragraph("    " * (indent + 1))
             base, ext = os.path.splitext(entry.name)
-            sub_run = sub_p.add_run(base)
-            sub_run.italic = True
-            sub_p.add_run(ext)
+            sub_p.add_run(base)
+            sub_p.add_run(ext).italic = True
 
 def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
     txt_file.write(f"{'    ' * indent}• {os.path.basename(folder)}\n")
