@@ -1,6 +1,8 @@
 import os
 import json
+import re
 from docx import Document
+from docx.shared import Pt
 
 # Language dictionaries
 LANGUAGES = {
@@ -31,7 +33,7 @@ LANGUAGES = {
         "enter_base_dir": "Enter the base directory where the folders will be created: ",
         "folders_created_successfully": "Folder structure created successfully!",
         "error_creating_folders": "An error occurred while creating folders: {e}",
-        "credits": "Credits: User Ium101 from GitHub",
+        "credits": "Made by User Ium101 from GitHub",
         "press_any_button": "Press any button to exit"
     },
     "pt": {
@@ -61,7 +63,7 @@ LANGUAGES = {
         "enter_base_dir": "Digite o diretório base onde as pastas serão criadas: ",
         "folders_created_successfully": "Estrutura de pastas criada com sucesso!",
         "error_creating_folders": "Ocorreu um erro ao criar as pastas: {e}",
-        "credits": "Créditos: Usuário Ium101 do GitHub",
+        "credits": "Feito pelo Usuário Ium101 do GitHub",
         "press_any_button": "Pressione qualquer botão para sair"
     }
 }
@@ -79,10 +81,10 @@ def get_lang():
 def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, specific_subfolders=None, ignore_hidden=False, L=None, lang='en'):
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
-    output_filename_base = f"{folder_name} ({disk_letter})"
+    output_file_ext = 'docx' if mode.upper() == 'A' else ('json' if mode.upper() == 'C' else 'txt')
+    output_file_path = os.path.join(directory, f"{folder_name} ({disk_letter}).{output_file_ext}")
     folders = []
     files = []
-    import re
     for entry in os.scandir(directory):
         if ignore_hidden and is_hidden_file(entry):
             continue
@@ -98,9 +100,10 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                         break
         elif entry.is_file():
             files.append(entry.path)
-    output_file_path = os.path.join(directory, f"{output_filename_base}.{'docx' if mode.upper() == 'A' else ('json' if mode.upper() == 'C' else 'txt')}")
+
     credits_str = L["credits"]
-    if mode.upper() == "A":
+
+    if mode.upper() == "A":  # DOCX
         try:
             doc = Document()
             doc.add_heading(f"{folder_name}", level=1)
@@ -114,12 +117,23 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     base, ext = os.path.splitext(os.path.basename(file))
                     p.add_run(base)
                     p.add_run(ext)
+
+            # Add credits at the end (small size)
+            p_credits = doc.add_paragraph()
+            run = p_credits.add_run(credits_str())
+            try:
+                run.font.size = Pt(8)
+            except Exception:
+                # If font sizing fails for any reason, ignore and continue
+                pass
+
             doc.save(output_file_path)
             print(L["list_success"].format(path=output_file_path))
             print(L["list_generated"])
         except Exception as e:
+            # Fallback to TXT if DOCX fails; include credits in TXT
             print(L["docx_failed"].format(err=e))
-            output_file_path = os.path.join(directory, f"{output_filename_base}.txt")
+            output_file_path = os.path.join(directory, f"{folder_name} ({disk_letter}).txt")
             with open(output_file_path, "w", encoding="utf-8") as txt_file:
                 txt_file.write(f"{folder_name}\n\n")
                 if list_option in [1, 2]:
@@ -129,9 +143,11 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     for file in files:
                         base, ext = os.path.splitext(os.path.basename(file))
                         txt_file.write(f"• {base}{ext}\n")
+                txt_file.write(f"\n{credits_str}\n")
             print(L["list_success"].format(path=output_file_path))
             print(L["list_generated"])
-    elif mode.upper() == "C":
+
+    elif mode.upper() == "C":  # JSON
         def folder_to_dict(folder):
             d = {"folder": os.path.basename(folder), "files": [], "subfolders": []}
             for entry in os.scandir(folder):
@@ -140,13 +156,21 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                 elif entry.is_dir():
                     d["subfolders"].append(folder_to_dict(entry.path))
             return d
-        db = {"root": folder_name, "files": [os.path.basename(f) for f in files] if list_option in [1, 3] else [], "folders": []}
+
+        db = {
+            "root": folder_name,
+            "files": [os.path.basename(f) for f in files] if list_option in [1, 3] else [],
+            "folders": [],
+            "credits": credits_str
+        }
         for folder in folders:
             db["folders"].append(folder_to_dict(folder))
+
         with open(output_file_path, "w", encoding="utf-8") as json_file:
-            json.dump(db, json_file, indent=2)
+            json.dump(db, json_file, indent=2, ensure_ascii=False)
         print(L["json_exported"].format(path=output_file_path))
-    else:
+
+    else:  # TXT
         with open(output_file_path, "w", encoding="utf-8") as txt_file:
             txt_file.write(f"{folder_name}\n\n")
             if list_option in [1, 2]:
@@ -156,6 +180,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                 for file in files:
                     base, ext = os.path.splitext(os.path.basename(file))
                     txt_file.write(f"• {base}{ext}\n")
+            txt_file.write(f"\n{credits_str}\n")
         print(L["list_success"].format(path=output_file_path))
         print(L["list_generated"])
 
