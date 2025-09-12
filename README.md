@@ -66,3 +66,19 @@ Tanto a versão de linha de comando quanto a GUI suportam inglês e português b
     - Execute o script: `./run_lister_z_gui.sh`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
 - **Linha de Comando:** 
     - Execute o script: `./run_lister_z.sh` e siga o prompt de idioma.
+
+### MacOS
+- **GUI:**
+    - Clique duas vezes em `Lister Z GUI.command`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
+- **Linha de Comando:**
+    - Clique duas vezes em `Lister Z.command` e siga o prompt de idioma.
+
+Python 3 é necessário para executar os scripts `.py`.
+
+## Versão Empresarial
+
+- Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
+- Pode criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
+
+Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
+Para suporte ou mais informações, entre em contato com Ium101.
