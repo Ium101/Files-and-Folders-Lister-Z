@@ -62,7 +62,7 @@ Follow the on-screen prompts to specify the folder and output options in your ch
 
 ## Enterprise Edition
 
-- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Do NOT include credits in the output files (DOCX / TXT / JSON).
 - Can create folders in the same structure as JSON file that's going to be selected.
 
 See `README.md` for more details.
@@ -135,7 +135,7 @@ Siga as instruções na tela para especificar a pasta e as opções de saída no
 
 ## Versão Empresarial
 
-- Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
+- Não inclui créditos nos arquivos de saída (DOCX / TXT / JSON).
 - Pode criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
 
 Veja o `README.md` para mais detalhes.
