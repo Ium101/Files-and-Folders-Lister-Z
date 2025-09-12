@@ -69,12 +69,12 @@ Python 3 é necessário para executar os scripts `.py`.
 Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
 Para suporte ou mais informações, entre em contato com Ium101.
 
-## Enterprise Edition
+## Alternative Version (Enterprise Edition)
 
 - Do NOT include credits in the output files (TXT / DOCX / JSON).
-- Can create folders in the same structure as JSON file that's going to be selected.
+- (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
 
-## Versão Empresarial
+## Versão Alternativa (Versão Empresarial)
 
 - Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
-- Pode criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
+- (Planejado no futuro) Também poderá criar pastas na mesma estrutura do arquivo JSON a ser selecionado.

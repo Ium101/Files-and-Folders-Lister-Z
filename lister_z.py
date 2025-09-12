@@ -7,8 +7,6 @@ from docx.shared import Pt
 LANGUAGES = {
     "en": {
         "select_language": "Select language / Selecione o idioma:\n1. Português Brasileiro\n2. English\nEnter 1 or 2: ",
-        "action_prompt": "What do you want to do?\n1. Create a list of files and folders\n2. Create a folder and file structure from a JSON file\nEnter your choice (1/2): ",
-        "invalid_action": "Invalid choice. Please enter 1 or 2.",
         "enter_directory": "Enter the directory to list: ",
         "error_directory": "Error: The directory '{dir}' does not exist. Please enter a valid folder.",
         "hide_hidden": "Do you want to hide the files desktop.ini, thumbs.db, ._.ds_store, .ds_store, .gitignore, and .gitkeep? (y/yes/n/no): ",
@@ -23,22 +21,13 @@ LANGUAGES = {
         "invalid_choice": "Invalid choice. Please enter 1, 2, or 3.",
         "invalid_number": "Invalid input. Please enter a number (1, 2, or 3).",
         "list_success": "List generated successfully: {path}",
-        "list_generated": "The List has been generated",
         "docx_failed": "DOCX generation failed: {err}. Falling back to TXT mode.",
         "json_exported": "JSON database exported: {path}",
-        "enter_json_path": "Enter the path to the JSON file: ",
-        "error_json_path": "Error: The file '{path}' does not exist.",
-        "error_json_format": "Error: The file '{path}' is not a valid JSON file. Please check the format.",
-        "enter_base_dir": "Enter the base directory where the structure will be created: ",
-        "folders_created_successfully": "Folder and file structure created successfully!",
-        "error_creating_folders": "An error occurred while creating the structure: {e}",
         "credits": "Credits: User Ium101 from GitHub",
         "press_any_button": "Press any button to exit"
     },
     "pt": {
         "select_language": "Selecione o idioma / Select language:\n1. Português Brasileiro\n2. English\nDigite 1 ou 2: ",
-        "action_prompt": "O que você deseja fazer?\n1. Criar uma lista de arquivos e pastas\n2. Criar uma estrutura de pastas e arquivos a partir de um arquivo JSON\nDigite sua escolha (1/2): ",
-        "invalid_action": "Escolha inválida. Por favor, insira 1 ou 2.",
         "enter_directory": "Digite o diretório para listar: ",
         "error_directory": "Erro: O diretório '{dir}' não existe. Por favor, insira uma pasta válida.",
         "hide_hidden": "Deseja ocultar os arquivos desktop.ini, thumbs.db, ._.ds_store, .ds_store, .gitignore, e .gitkeep? (s/sim/n/não): ",
@@ -53,15 +42,8 @@ LANGUAGES = {
         "invalid_choice": "Escolha inválida. Por favor, insira 1, 2 ou 3.",
         "invalid_number": "Entrada inválida. Por favor, insira um número (1, 2 ou 3).",
         "list_success": "Lista gerada com sucesso: {path}",
-        "list_generated": "A lista foi gerada",
         "docx_failed": "Falha ao gerar DOCX: {err}. Gerando TXT em vez disso.",
         "json_exported": "Banco de dados JSON exportado: {path}",
-        "enter_json_path": "Digite o caminho para o arquivo JSON: ",
-        "error_json_path": "Erro: O arquivo '{path}' não existe.",
-        "error_json_format": "Erro: O arquivo '{path}' não é um arquivo JSON válido. Por favor, verifique o formato.",
-        "enter_base_dir": "Digite o diretório base onde a estrutura será criada: ",
-        "folders_created_successfully": "Estrutura de pastas e arquivos criada com sucesso!",
-        "error_creating_folders": "Ocorreu um erro ao criar a estrutura: {e}",
         "credits": "Créditos: Usuário Ium101 do GitHub",
         "press_any_button": "Pressione qualquer botão para sair"
     }
@@ -109,7 +91,6 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     p.add_run(base).italic = True
                     p.add_run(ext)
 
-            # Add credits
             credits_p = doc.add_paragraph()
             credits_run = credits_p.add_run(L["credits"].lower())
             credits_run.font.size = Pt(8)
@@ -118,7 +99,6 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
             print(L["list_success"].format(path=output_file_path))
         except Exception as e:
             print(L["docx_failed"].format(err=e))
-            # Fallback to TXT is complex here, so we just report the error.
 
     elif mode.upper() == "C":
         def folder_to_dict(path):
@@ -180,48 +160,6 @@ def is_hidden_file(entry):
         pass
     return False
 
-def create_folders_from_json_cli(json_path, base_dir, L):
-    try:
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except json.JSONDecodeError:
-        print(L["error_json_format"].format(path=json_path))
-        return False
-    except Exception as e:
-        print(L["error_creating_folders"].format(e=e))
-        return False
-
-    try:
-        def create_structure(d, parent):
-            folder_name = d.get("folder", d.get("root", ""))
-            if not folder_name:
-                return
-
-            folder_path = os.path.join(parent, folder_name)
-            os.makedirs(folder_path, exist_ok=True)
-
-            for filename in d.get("files", []):
-                if isinstance(filename, str):
-                    try:
-                        file_path = os.path.join(folder_path, filename)
-                        with open(file_path, 'w') as f: pass
-                    except IOError as e:
-                        print(f"Warning: Could not create file {filename} in {folder_path}: {e}")
-
-            for subfolder in d.get("subfolders", []):
-                create_structure(subfolder, folder_path)
-
-        if "root" in data:
-            create_structure({"folder": data["root"], "subfolders": data.get("folders", []), "files": data.get("files", [])}, base_dir)
-        else:
-            create_structure(data, base_dir)
-
-        print(L["folders_created_successfully"])
-        return True
-    except Exception as e:
-        print(L["error_creating_folders"].format(e=e))
-        return False
-
 def run_create_list(L, lang):
     while True:
         directory_to_list = input(L["enter_directory"])
@@ -258,36 +196,8 @@ def run_create_list(L, lang):
 
     list_files_and_folders(directory_to_list, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, lang=lang)
 
-def run_create_folders(L):
-    while True:
-        json_path = input(L["enter_json_path"]).strip()
-        if os.path.isfile(json_path):
-            break
-        else:
-            print(L["error_json_path"].format(path=json_path))
-
-    while True:
-        base_dir = input(L["enter_base_dir"]).strip()
-        if os.path.isdir(base_dir):
-            break
-        else:
-            print(L["error_directory"].format(dir=base_dir))
-
-    create_folders_from_json_cli(json_path, base_dir, L)
-
 if __name__ == "__main__":
     lang = get_lang()
     L = LANGUAGES[lang]
-
-    while True:
-        action = input(L["action_prompt"])
-        if action.strip() == "1":
-            run_create_list(L, lang)
-            break
-        elif action.strip() == "2":
-            run_create_folders(L)
-            break
-        else:
-            print(L["invalid_action"])
-
+    run_create_list(L, lang)
     input(L["press_any_button"])

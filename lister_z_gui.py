@@ -9,7 +9,6 @@ LANGUAGES = {
     "en": {
         "title": "Lister Z",
         "create_list": "Create a list of files and folders (English)",
-        "create_folders": "Create folder & file structure from JSON (English)",
         "select_dir": "Select a folder to list.",
         "error_dir": "The directory '{directory}' does not exist. Please select a valid folder.",
         "mode": "Do you want to generate the output as DOCX (A), TXT (B), or JSON (C)?",
@@ -21,19 +20,11 @@ LANGUAGES = {
         "json_success": "JSON database exported: {path}",
         "docx_error": "DOCX generation failed: {err}",
         "credits": "Credits: User Ium101 from GitHub",
-        "select_json": "Select the JSON file for structure creation",
-        "no_json_selected": "Operation cancelled: No JSON file was selected.",
-        "invalid_json_format": "The selected file is not a valid JSON file. Please choose a file with the correct format.",
-        "select_base_dir": "Select the base folder to create the structure in",
-        "no_base_dir_selected": "Operation cancelled: No base folder was selected.",
-        "folders_created": "Folder and file structure created successfully!",
-        "error_creating": "Error creating structure",
         "error": "Error"
     },
     "pt": {
         "title": "Lister Z",
         "create_list": "Criar uma lista de arquivos e pastas (Português)",
-        "create_folders": "Criar estrutura de pastas e arquivos a partir de JSON (Português)",
         "select_dir": "Selecione uma pasta para listar.",
         "error_dir": "O diretório '{directory}' não existe. Por favor, selecione uma pasta válida.",
         "mode": "Deseja gerar a saída como DOCX (A), TXT (B) ou JSON (C)?",
@@ -45,13 +36,6 @@ LANGUAGES = {
         "json_success": "Banco de dados JSON exportado: {path}",
         "docx_error": "Falha ao gerar DOCX: {err}",
         "credits": "Créditos: Usuário Ium101 do GitHub",
-        "select_json": "Selecione o arquivo JSON para a criação da estrutura",
-        "no_json_selected": "Operação cancelada: Nenhum arquivo JSON foi selecionado.",
-        "invalid_json_format": "O arquivo selecionado não é um JSON válido. Por favor, escolha um arquivo com o formato correto.",
-        "select_base_dir": "Selecione a pasta base para criar a estrutura",
-        "no_base_dir_selected": "Operação cancelada: Nenhuma pasta base foi selecionada.",
-        "folders_created": "Estrutura de pastas e arquivos criada com sucesso!",
-        "error_creating": "Erro ao criar a estrutura",
         "error": "Erro"
     }
 }
@@ -200,86 +184,19 @@ def run_lister(root, lang_code):
         if root.winfo_exists():
             root.deiconify()
 
-def create_folders_from_json_gui(root, lang_code):
-    root.withdraw()
-    try:
-        L = LANGUAGES[lang_code]
-        dialog_root = tk.Toplevel(root)
-        dialog_root.withdraw()
-
-        while True:
-            json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=dialog_root)
-            if not json_path:
-                dialog_root.destroy()
-                return
-            try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                break
-            except json.JSONDecodeError:
-                messagebox.showerror(L["error"], L["invalid_json_format"], parent=dialog_root)
-            except Exception as e:
-                messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
-                dialog_root.destroy()
-                return
-
-        base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=dialog_root)
-        if not base_dir:
-            dialog_root.destroy()
-            return
-
-        try:
-            def create_structure(d, parent):
-                folder_name = d.get("folder", d.get("root", ""))
-                if folder_name:
-                    folder_path = os.path.join(parent, folder_name)
-                    os.makedirs(folder_path, exist_ok=True)
-
-                    for filename in d.get("files", []):
-                        if isinstance(filename, str):
-                            try:
-                                file_path = os.path.join(folder_path, filename)
-                                with open(file_path, 'w') as f:
-                                    pass
-                            except IOError as e:
-                                messagebox.showwarning("File Creation Warning", f"Could not create file {filename} in {folder_path}: {e}", parent=dialog_root)
-
-                    for subfolder in d.get("subfolders", []):
-                        create_structure(subfolder, folder_path)
-
-            if "root" in data:
-                create_structure({"folder": data["root"], "subfolders": data.get("folders", []), "files": data.get("files", [])}, base_dir)
-            else:
-                create_structure(data, base_dir)
-
-            messagebox.showinfo(L["title"], L["folders_created"], parent=dialog_root)
-        except Exception as e:
-            messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
-
-        dialog_root.destroy()
-    finally:
-        if root.winfo_exists():
-            root.deiconify()
-
 def run_gui():
     root = tk.Tk()
     root.title("Lister Z")
-    root.geometry("500x250")
+    root.geometry("500x150")
 
     L_en = LANGUAGES["en"]
     L_pt = LANGUAGES["pt"]
 
     list_en_btn = tk.Button(root, text=L_en["create_list"], command=lambda: run_lister(root, "en"), height=2, width=50)
-    list_en_btn.pack(pady=5)
+    list_en_btn.pack(pady=10)
 
     list_pt_btn = tk.Button(root, text=L_pt["create_list"], command=lambda: run_lister(root, "pt"), height=2, width=50)
-    list_pt_btn.pack(pady=5)
-
-    create_en_btn = tk.Button(root, text=L_en["create_folders"], command=lambda: create_folders_from_json_gui(root, "en"), height=2, width=50)
-    create_en_btn.pack(pady=5)
-
-    create_pt_btn = tk.Button(root, text=L_pt["create_folders"], command=lambda: create_folders_from_json_gui(root, "pt"), height=2, width=50)
-    create_pt_btn.pack(pady=5)
+    list_pt_btn.pack(pady=10)
 
     credits_frame = tk.Frame(root)
     credits_frame.pack(side="bottom", pady=10)
