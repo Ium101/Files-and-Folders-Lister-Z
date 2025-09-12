@@ -60,14 +60,15 @@ Follow the on-screen prompts to specify the folder and output options in your ch
 - For Linux, use the provided launch scripts: `run_lister_z.sh`, or `run_lister_z_gui.sh`.
 - For MacOS, use the provided launch scripts:  `Lister Z.command`, or `Lister Z GUI.command`.
 
-## Alternative Versions (Alt Folder)
+## Enterprise Edition
 
-The Alt folder contains alternative versions of the CLI and GUI programs. These versions:
-- Do NOT include credits in the output files (TXT, DOCX, JSON).
-- 
+- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Can create folders in the same structure as JSON file that's going to be selected.
 
 See `README.md` for more details.
 For support or more information, refer to the project README or contact Ium101.
+
+
 
 # Manual do Usuário - Files and Folders Lister Z
 
@@ -132,15 +133,10 @@ Siga as instruções na tela para especificar a pasta e as opções de saída no
 - Para Linux, use os scripts de inicialização fornecidos: `run_lister_z.sh` ou `run_lister_z_gui.sh`.
 - Para MacOS, use os scripts de inicialização fornecidos: `Lister Z.command` ou `Lister Z GUI.command`.
 
-Veja o `README.md` para mais detalhes.
-Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
-
-## Enterprise Edition
-
-- Do NOT include credits in the output files (TXT / DOCX / JSON).
-- Can create folders in the same structure as JSON file that's going to be selected.
-
 ## Versão Empresarial
 
 - Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
 - Pode criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
+
+Veja o `README.md` para mais detalhes.
+Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
