@@ -33,12 +33,16 @@ Python 3 is required to run the `.py` scripts.
 
 ## Enterprise Edition
 
-- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Do NOT include credits in the output files (DOCX / TXT / JSON).
 - Can create folders and empy text files in the same structure as JSON file that's going to be selected.
 
 For more details and advanced options, see the `USER_MANUAL.md` file.
 For support or more information, contact Ium101.
 
+## Enterprise Edition
+
+- Do NOT include credits in the output files (TXT / DOCX / JSON).
+- Can create folders in the same structure as JSON file that's going to be selected.
 
 
 # Listador de Pastas e Arquivos Z
@@ -74,8 +78,8 @@ Python 3 é necessário para executar os scripts `.py`.
 
 ## Versão Empresarial
 
-- Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
-- Pode criar pastas e arquivos de texto com nomes na mesma estrutura do arquivo JSON a ser selecionado.
+- Não inclui créditos nos arquivos de saída (DOCX / TXT / JSON).
+- Pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
 
 Para mais detalhes e opções avançadas, veja o arquivo `USER_MANUAL.md`.
 Para suporte ou mais informações, entre em contato com Ium101.
