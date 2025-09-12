@@ -135,12 +135,12 @@ Siga as instruções na tela para especificar a pasta e as opções de saída no
 Veja o `README.md` para mais detalhes.
 Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
 
-## Alternative Version (Enterprise Edition)
+## Enterprise Edition
 
 - Do NOT include credits in the output files (TXT / DOCX / JSON).
 - (Planned in the future) Also will can create folders in the same structure as JSON file that's going to be selected.
 
-## Versão Alternativa (Versão Empresarial)
+## Versão Empresarial
 
 - Não inclui créditos nos arquivos de saída (TXT / DOCX / JSON).
 - (Planejado no futuro) Também poderá criar pastas na mesma estrutura do arquivo JSON a ser selecionado.
