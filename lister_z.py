@@ -4,7 +4,7 @@ import re
 from docx import Document
 from docx.shared import Pt
 
-# Language dictionaries (credits updated to exactly what you requested)
+# Language dictionaries
 LANGUAGES = {
     "en": {
         "select_language": "Select language / Selecione o idioma:\n1. Português Brasileiro\n2. English\nEnter 1 or 2: ",

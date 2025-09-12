@@ -24,7 +24,7 @@ LANGUAGES = {
         "credits": "Made by User Ium101 from GitHub",
         "select_json": "Select the JSON file for folder creation",
         "no_json_selected": "Operation cancelled: No JSON file was selected.",
-        "invalid_json_format": "The selected file is not a valid JSON file. Please choose a file with the correct format.",
+        "invalid_json_format": "The selepyinstaller --onefile --windowed lister_z_gui.py ted file is not a valid JSON file. Please choose a file with the correct format.",
         "select_base_dir": "Select the base folder to create the structure in",
         "no_base_dir_selected": "Operation cancelled: No base folder was selected.",
         "folders_created": "Folder structure created successfully!",
