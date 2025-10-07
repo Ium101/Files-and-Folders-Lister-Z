@@ -177,30 +177,26 @@ def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
 
 def create_folders_from_json_gui(root, lang_code):
     L = LANGUAGES[lang_code]
-    dialog_root = tk.Toplevel(root)
-    dialog_root.transient(root)
-    dialog_root.grab_set()
-    dialog_root.withdraw()
-
+    root.withdraw()
     while True:
-        json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=dialog_root)
+        json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=root)
         if not json_path:
-            dialog_root.destroy()
+            root.deiconify()
             return
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             break
         except json.JSONDecodeError:
-            messagebox.showerror(L["error"], L["invalid_json_format"], parent=dialog_root)
+            messagebox.showerror(L["error"], L["invalid_json_format"], parent=root)
         except Exception as e:
-            messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
-            dialog_root.destroy()
+            messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=root)
+            root.deiconify()
             return
 
-    base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=dialog_root)
+    base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=root)
     if not base_dir:
-        dialog_root.destroy()
+        root.deiconify()
         return
 
     try:
@@ -217,27 +213,23 @@ def create_folders_from_json_gui(root, lang_code):
         else:
             create_structure(data, base_dir)
 
-        messagebox.showinfo(L["title"], L["folders_created"], parent=dialog_root)
+        messagebox.showinfo(L["title"], L["folders_created"], parent=root)
     except Exception as e:
-        messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=dialog_root)
+        messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=root)
 
-    dialog_root.destroy()
+    root.deiconify()
 
 def run_lister(root, lang_code):
     L = LANGUAGES[lang_code]
-    dialog_root = tk.Toplevel(root)
-    dialog_root.transient(root)
-    dialog_root.grab_set()
-    dialog_root.withdraw()
-
-    directory = filedialog.askdirectory(title=L["select_dir"], parent=dialog_root)
+    root.withdraw()
+    directory = filedialog.askdirectory(title=L["select_dir"], parent=root)
     if not directory:
-        dialog_root.destroy()
+        root.deiconify()
         return
 
-    mode = simpledialog.askstring(L["title"], L["mode"], parent=dialog_root)
+    mode = simpledialog.askstring(L["title"], L["mode"], parent=root)
     if mode is None:
-        dialog_root.destroy()
+        root.deiconify()
         return
     mode = mode.strip().lower()
     if mode in ["a", "docx"]:
@@ -247,25 +239,24 @@ def run_lister(root, lang_code):
     elif mode in ["c", "json"]:
         mode = "C"
     else:
-        messagebox.showerror(L["title"], L["invalid_mode"], parent=dialog_root)
-        dialog_root.destroy()
+        messagebox.showerror(L["title"], L["invalid_mode"], parent=root)
+        root.deiconify()
         return
 
-    list_option = simpledialog.askinteger(L["title"], L["list_option"], minvalue=1, maxvalue=3, parent=dialog_root)
+    list_option = simpledialog.askinteger(L["title"], L["list_option"], minvalue=1, maxvalue=3, parent=root)
     if list_option is None:
-        dialog_root.destroy()
+        root.deiconify()
         return
 
-    filter_input = simpledialog.askstring(L["title"], L["filter"], parent=dialog_root)
+    filter_input = simpledialog.askstring(L["title"], L["filter"], parent=root)
     if filter_input is None:
-        dialog_root.destroy()
+        root.deiconify()
         return
     specific_subfolders = [f.strip() for f in filter_input.split(",")] if filter_input else None
 
-    ignore_hidden = messagebox.askyesno(L["title"], L["hide_hidden"], parent=dialog_root)
-    # askyesno returns True/False; proceed.
-    list_files_and_folders(directory, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, parent=dialog_root)
-    dialog_root.destroy()
+    ignore_hidden = messagebox.askyesno(L["title"], L["hide_hidden"], parent=root)
+    list_files_and_folders(directory, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, parent=root)
+    root.deiconify()
 
 def run_gui():
     root = tk.Tk()
