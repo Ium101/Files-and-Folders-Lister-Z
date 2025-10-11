@@ -8,8 +8,8 @@
   <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status do Projeto">
   <img src="https://img.shields.io/badge/Python-3.8+-blue" alt="Linguagem">
   <img src="https://img.shields.io/badge/OS-Windows | Linux | macOS-blue" alt="Compatibilidade">
-  <a href="#">
-    <img src="https://img.shields.io/badge/License-MIT-yellow" alt="Licença">
+  <a href="https://www.gnu.org/licenses/gpl-3.0">
+    <img src="https://img.shields.io/badge/License-GPLv3-blue" alt="License: GPL v3">
   </a>
 </p>
 
