@@ -1,17 +1,4 @@
-<p align="center">
-  <img width="1536" height="1024" alt="Files & Folders Lister Z" src="https://github.com/user-attachments/assets/c6968f79-c6a6-4267-816f-5cac0ff96a9e" />
-</p>
-
-# Files & Folders Lister Z
-
-<p align="center">
-  <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status do Projeto">
-  <img src="https://img.shields.io/badge/Python-3.8+-blue" alt="Linguagem">
-  <img src="https://img.shields.io/badge/OS-Windows | Linux | macOS-blue" alt="Compatibilidade">
-  <a href="#">
-    <img src="https://img.shields.io/badge/License-MIT-yellow" alt="Licença">
-  </a>
-</p>
+# User Manual - Files and Folders Lister Z
 
 <h3 align="center">
   <a href="#english">English</a> • <a href="#português-brasil">Português (Brasil)</a>
@@ -19,88 +6,154 @@
 
 ---
 
-<h2>English</h2>
+## English
 
-A Python tool to generate organized lists of files and folders in a directory, with options for DOCX or TXT or JSON output. Features include recursive listing, sorting, and customizable output formats.
+### Table of Contents
+1.  [Overview](#overview)
+2.  [How to Use](#how-to-use)
+    -   [Using the GUI](#1-using-the-gui)
+    -   [Using the Command Line](#2-using-the-command-line)
+3.  [Features](#features)
+4.  [Notes](#notes)
+5.  [Enterprise Edition](#enterprise-edition)
 
-Now it also can create folders and empty text files in the same structure as a JSON file that's going to be selected.
+### Overview
+Files and Folders Lister Z or simply Lister Z is a utility for listing the contents of directories on your computer. It provides both a command-line and a graphical user interface (GUI) for easy use.
+It can also create folders and empty text files in the same structure as a selected JSON file.
 
-<h3>Compatibility</h3>
+### How to Use
 
-Files & Folders Lister Z or simply Lister Z works on **Windows**, **Linux**, and **MacOS**.
+#### Multi-language Support
+Both the GUI and CLI versions support English and Brazilian Portuguese. In the GUI, there are two main buttons: "Executar Listador de Pastas e Arquivos Z" (Brazilian Portuguese, above) and "Run Files & Folders Lister Z" (English, below).
 
-<h3>How to Run</h3>
+#### 1. Using the GUI
+**Windows:**
+-   Double-click `lister_z_gui.exe` to launch the graphical interface. The GUI shows both language buttons as described above.
 
-<h4>Multi-language Support</h4>
-Both the command-line and GUI versions support English and Brazilian Portuguese. In the GUI, there are two main buttons: "Executar Listador de Pastas e Arquivos Z" (Brazilian Portuguese, above) and "Run Files & Folders Lister Z" (English, below).
+**Linux:**
+-   Run the shell script:
+    ```bash
+    ./run_lister_z_gui.sh
+    ```
+**MacOS:**
+-   Double-click `Lister Z GUI.command`. The GUI features are identical to the Windows version, including both language buttons.
 
-<h4>Windows</h4>
--   **GUI:**
-    -   Double-click `lister_z_gui.exe`. The GUI shows both language buttons as described above.
--   **Command Line:**
-    -   Use `run_lister_z.cmd` or run `python lister_z.py` in a terminal. The program will prompt for language selection.
+Select the folder you want to list using the provided options. Choose your desired output format (DOCX, TXT, or JSON). Click either main button to generate the list in your preferred language.
 
-<h4>Linux</h4>
--   **GUI:**
-    -   Run the shell script: `./run_lister_z_gui.sh`. The GUI features are identical to the Windows version, including both language buttons.
--   **Command Line:**
-    -   Run the shell script: `./run_lister_z.sh` and follow the language prompt.
+#### 2. Using the Command Line
+**Windows:**
+-   Open a command prompt or PowerShell window.
+-   Run the script with Python:
+    ```bash
+    python lister_z.py
+    ```
+-   Or use the provided batch file:
+    ```bash
+    run_lister_z.cmd
+    ```
+The program will prompt you to select your language and guide you through the options.
 
-<h4>MacOS</h4>
--   **GUI:**
-    -   Double-click `Lister Z GUI.command`. The GUI features are identical to the Windows version, including both language buttons.
--   **Command Line:**
-    -   Double-click `Lister Z.command` and follow the language prompt.
+**Linux:**
+-   Run the shell script:
+    ```bash
+    ./run_lister_z.sh
+    ```
+You will be prompted for language selection and options.
 
-*Python 3 is required to run the `.py` scripts.*
+**MacOS:**
+-   Double-click `Lister Z.command` and follow the language prompt.
 
-<h3>Enterprise Edition</h3>
+Follow the on-screen prompts to specify the folder and output options in your chosen language.
 
+### Features
+-   List all files and folders in a selected directory.
+-   Export results to various formats.
+-   Simple and intuitive interface.
+
+### Notes
+-   Requires Python to run the `lister_z.py` and `lister_z_gui.py` scripts.
+-   For the GUI version on Windows, use the `lister_z_gui.exe` file for convenience (no Python required).
+-   For Linux, use the provided launch scripts: `run_lister_z.sh`, or `run_lister_z_gui.sh`.
+-   For MacOS, use the provided launch scripts: `Lister Z.command`, or `Lister Z GUI.command`.
+
+### Enterprise Edition
 -   Does NOT include credits in the output files (DOCX / TXT / JSON).
 
-For more details and advanced options, see the **[USER_MANUAL.md](USER_MANUAL.md)** file.
-For support or more information, contact Ium101.
+See `README.md` for more details. For support or more information, refer to the project README or contact Ium101.
 
 ---
 
-<h2>Português (Brasil)</h2>
+## Português (Brasil)
 
-Um utilitário Python para gerar listas organizadas de arquivos e pastas em um diretório, com opções de saída em DOCX, TXT ou JSON. Recursos incluem listagem recursiva, ordenação e formatos de saída personalizáveis.
+### Índice
+1.  [Visão Geral](#visão-geral)
+2.  [Como Usar](#como-usar)
+    -   [Usando a GUI](#1-usando-a-gui-1)
+    -   [Usando a Linha de Comando](#2-usando-a-linha-de-comando-1)
+3.  [Funcionalidades](#funcionalidades)
+4.  [Observações](#observações)
+5.  [Versão Empresarial](#versão-empresarial)
 
-Agora também pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
+### Visão Geral
+Listador de Pastas e Arquivos Z ou simplesmente Listador Z é um utilitário para listar o conteúdo de diretórios no seu computador. Ele oferece tanto uma interface de linha de comando quanto uma interface gráfica (GUI) para facilitar o uso.
+Também pode criar pastas e arquivos de texto vazios com nomes na mesma estrutura do arquivo JSON a ser selecionado.
 
-<h3>Compatibilidade</h3>
+### Como Usar
 
-Listador de Arquivos e Pastas Z, ou simplesmente Listador Z, funciona em **Windows**, **Linux** e **MacOS**.
+#### Suporte a Múltiplos Idiomas
+Tanto a versão GUI quanto a CLI suportam inglês e português brasileiro. Na GUI, há dois botões principais: "Executar Listador de Pastas e Arquivos Z" (português brasileiro, acima) e "Run Files & Folders Lister Z" (inglês, abaixo).
 
-<h3>Como Executar</h3>
+#### 1. Usando a GUI
+**Windows:**
+-   Clique duas vezes em `lister_z_gui.exe` para abrir a interface gráfica. A GUI mostra ambos os botões de idioma conforme descrito acima.
 
-<h4>Suporte a Múltiplos Idiomas</h4>
-Tanto a versão de linha de comando quanto a GUI suportam inglês e português brasileiro. Na GUI, há dois botões principais: "Executar Listador de Pastas e Arquivos Z" (português brasileiro, acima) e "Run Files & Folders Lister Z" (inglês, abaixo).
+**Linux:**
+-   Execute o script:
+    ```bash
+    ./run_lister_z_gui.sh
+    ```
+**MacOS:**
+-   Clique duas vezes em `Lister Z GUI.command`. A GUI é idêntica à versão Windows, incluindo ambos os botões de idioma.
 
-<h4>Windows</h4>
--   **GUI:**
-    -   Clique duas vezes em `lister_z_gui.exe`. A interface gráfica mostra ambos os botões de idioma e a área de créditos conforme descrito acima.
--   **Linha de Comando:**
-    -   Use `run_lister_z.cmd` ou execute `python lister_z.py` no terminal. O programa solicitará a seleção de idioma.
+Selecione a pasta que deseja listar usando as opções fornecidas. Escolha o formato de saída desejado (DOCX, TXT ou JSON). Clique em qualquer botão principal para gerar a lista no idioma preferido.
 
-<h4>Linux</h4>
--   **GUI:**
-    -   Execute o script: `./run_lister_z_gui.sh`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
--   **Linha de Comando:**
-    -   Execute o script: `./run_lister_z.sh` e siga o prompt de idioma.
+#### 2. Usando a Linha de Comando
+**Windows:**
+-   Abra o Prompt de Comando ou PowerShell.
+-   Execute o script com Python:
+    ```bash
+    python lister_z.py
+    ```
+-   Ou use o arquivo batch fornecido:
+    ```bash
+    run_lister_z.cmd
+    ```
+O programa solicitará a seleção de idioma e guiará você pelas opções.
 
-<h4>MacOS</h4>
--   **GUI:**
-    -   Clique duas vezes em `Lister Z GUI.command`. A interface gráfica é idêntica à versão Windows, incluindo os botões de idioma e área de créditos.
--   **Linha de Comando:**
-    -   Clique duas vezes em `Lister Z.command` e siga o prompt de idioma.
+**Linux:**
+-   Execute o script:
+    ```bash
+    ./run_lister_z.sh
+    ```
+Você será solicitado a selecionar o idioma e as opções.
 
-*Python 3 é necessário para executar os scripts `.py`.*
+**MacOS:**
+-   Clique duas vezes em `Lister Z.command` e siga o prompt de idioma.
 
-<h3>Versão Empresarial</h3>
+Siga as instruções na tela para especificar a pasta e as opções de saída no idioma escolhido.
 
+### Funcionalidades
+-   Lista todos os arquivos e pastas em um diretório selecionado.
+-   Exporta resultados para vários formatos.
+-   Interface simples e intuitiva.
+
+### Observações
+-   Requer Python para executar os scripts `lister_z.py` e `lister_z_gui.py`.
+-   Para a versão GUI no Windows, use o arquivo `lister_z_gui.exe` para maior comodidade (não é necessário Python).
+-   Para Linux, use os scripts de inicialização fornecidos: `run_lister_z.sh` ou `run_lister_z_gui.sh`.
+-   Para MacOS, use os scripts de inicialização fornecidos: `Lister Z.command` ou `Lister Z GUI.command`.
+
+### Versão Empresarial
 -   Não inclui créditos nos arquivos de saída (DOCX / TXT / JSON).
 
-Para mais detalhes e opções avançadas, veja o arquivo **[USER_MANUAL.md](USER_MANUAL.md)**.
-Para suporte ou mais informações, entre em contato com Ium101.
+Veja o `README.md` para mais detalhes. Para suporte ou mais informações, consulte o README do projeto ou entre em contato com Ium101.
