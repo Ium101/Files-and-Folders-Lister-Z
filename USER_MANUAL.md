@@ -31,10 +31,7 @@ Both the GUI and CLI versions support English and Brazilian Portuguese. In the G
 -   Double-click `lister_z_gui.exe` to launch the graphical interface. The GUI shows both language buttons as described above.
 
 **Linux:**
--   Run the shell script:
-    ```bash
-    ./run_lister_z_gui.sh
-    ```
+-   Double-click `lister_z_gui.desktop` in Dolphin file manager to launch the GUI.
 **MacOS:**
 -   Double-click `Lister Z GUI.command`. The GUI features are identical to the Windows version, including both language buttons.
 
@@ -54,10 +51,7 @@ Select the folder you want to list using the provided options. Choose your desir
 The program will prompt you to select your language and guide you through the options.
 
 **Linux:**
--   Run the shell script:
-    ```bash
-    ./run_lister_z.sh
-    ```
+-   Double-click `lister_z.desktop` in Dolphin file manager to launch the CLI in a terminal.
 You will be prompted for language selection and options.
 
 **MacOS:**

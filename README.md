@@ -23,6 +23,15 @@ Now it also can create folders and empty text files in the same structure as a J
 
 Files & Folders Lister Z or simply Lister Z works on **Windows**, **Linux**, and **MacOS**.
 
+### Installation
+
+- Ensure Python 3.8+ is installed.
+- Install required dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- For Linux, tkinter is usually included with Python, but if not, install it via your package manager (e.g., `sudo apt install python3-tk` on Ubuntu).
+
 ### How to Run
 
 #### Multi-language Support
@@ -36,9 +45,9 @@ Both the command-line and GUI versions support English and Brazilian Portuguese.
 
 #### Linux
 -   **GUI:**
-    -   Run the shell script: `./run_lister_z_gui.sh`. The GUI features are identical to the Windows version, including both language buttons.
+    -   Double-click `lister_z_gui.desktop` in Dolphin or other file managers to launch the GUI. The GUI features are identical to the Windows version, including both language buttons.
 -   **Command Line:**
-    -   Run the shell script: `./run_lister_z.sh` and follow the language prompt.
+    -   Double-click `lister_z.desktop` in Dolphin or other file managers to launch the CLI in a terminal and follow the language prompt.
 
 #### MacOS
 -   **GUI:**

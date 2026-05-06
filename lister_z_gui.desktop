@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Files & Folders Lister Z GUI
+Comment=Graphical interface for listing files and folders
+Exec=python3 /mnt/Disco_Local1/Codes/Files-and-Folders-Lister-Z/lister_z_gui.py
+Icon=folder
+Terminal=false
+Categories=Utility;FileTools;

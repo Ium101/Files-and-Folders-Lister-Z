@@ -88,7 +88,7 @@ def is_hidden_file(entry):
 def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, specific_subfolders=None, ignore_hidden=False, L=None, parent=None, output_folder=None):
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
-    output_filename_base = f"{folder_name} ({disk_letter})"
+    output_filename_base = f"{folder_name}{f' ({disk_letter})' if disk_letter else ''}"
     folders, files = [], []
 
     for entry in os.scandir(directory):

@@ -81,8 +81,9 @@ def get_lang():
 def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, specific_subfolders=None, ignore_hidden=False, L=None, lang='en'):
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
+    output_filename_base = f"{folder_name}{f' ({disk_letter})' if disk_letter else ''}"
     output_file_ext = 'docx' if mode.upper() == 'A' else ('json' if mode.upper() == 'C' else 'txt')
-    output_file_path = os.path.join(directory, f"{folder_name} ({disk_letter}).{output_file_ext}")
+    output_file_path = os.path.join(directory, f"{output_filename_base}.{output_file_ext}")
     folders = []
     files = []
     for entry in os.scandir(directory):
@@ -133,7 +134,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
         except Exception as e:
             # Fallback to TXT if DOCX fails; include credits in TXT
             print(L["docx_failed"].format(err=e))
-            output_file_path = os.path.join(directory, f"{folder_name} ({disk_letter}).txt")
+            output_file_path = os.path.join(directory, f"{output_filename_base}.txt")
             with open(output_file_path, "w", encoding="utf-8") as txt_file:
                 txt_file.write(f"{folder_name}\n\n")
                 if list_option in [1, 2]:
