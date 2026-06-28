@@ -1,6 +1,8 @@
 import os
 import json
 import re
+import subprocess
+import configparser
 from docx import Document
 from docx.shared import Pt
 
@@ -33,7 +35,7 @@ LANGUAGES = {
         "enter_base_dir": "Enter the base directory where the folders will be created: ",
         "folders_created_successfully": "Folder structure created successfully!",
         "error_creating_folders": "An error occurred while creating folders: {e}",
-        "credits": "Made by User Ium101 from GitHub",
+        "credits": "Made by Ium101 from GitHub",
         "press_any_button": "Press any button to exit"
     },
     "pt": {
@@ -63,22 +65,89 @@ LANGUAGES = {
         "enter_base_dir": "Digite o diretório base onde as pastas serão criadas: ",
         "folders_created_successfully": "Estrutura de pastas criada com sucesso!",
         "error_creating_folders": "Ocorreu um erro ao criar as pastas: {e}",
-        "credits": "Feito pelo Usuário Ium101 do GitHub",
+        "credits": "Feito por Ium101 do GitHub",
         "press_any_button": "Pressione qualquer botão para sair"
     }
 }
 
+# ── SETTINGS (.ini) ───────────────────────────────────────────────────────────
+
+def _settings_file_path() -> str:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    suffix = "windows" if os.name == "nt" else "linux"
+    return os.path.join(script_dir, f"lister_z_settings_{suffix}.ini")
+
+
+def _load_settings() -> configparser.ConfigParser:
+    cfg = configparser.ConfigParser()
+    cfg["settings"] = {"language": "en"}
+    try:
+        cfg.read(_settings_file_path(), encoding="utf-8")
+    except Exception:
+        pass
+    return cfg
+
+
+def _save_lang(lang: str) -> None:
+    cfg = _load_settings()
+    cfg["settings"]["language"] = lang
+    try:
+        with open(_settings_file_path(), "w", encoding="utf-8") as fh:
+            cfg.write(fh)
+    except Exception:
+        pass
+
+
+# ── AUTO-OPEN ─────────────────────────────────────────────────────────────────
+
+def _open_file(path: str) -> None:
+    """Open the generated file with the OS default application."""
+    try:
+        if os.name == "nt":
+            os.startfile(path)
+        else:
+            subprocess.Popen(["xdg-open", path])
+    except Exception as exc:
+        print(f"[WARN] Could not open file automatically: {exc}")
+
+
+# ── HELPERS ───────────────────────────────────────────────────────────────────
+
 def get_lang():
+    cfg = _load_settings()
+    saved = cfg.get("settings", "language", fallback=None)
+    if saved in ("en", "pt"):
+        return saved
     while True:
         lang_choice = input(LANGUAGES["en"]["select_language"])
         if lang_choice.strip() == "1":
+            _save_lang("pt")
             return "pt"
         elif lang_choice.strip() == "2":
+            _save_lang("en")
             return "en"
         else:
             print("Invalid input. Please enter 1 or 2. / Entrada inválida. Por favor, insira 1 ou 2.")
 
-def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, specific_subfolders=None, ignore_hidden=False, L=None, lang='en'):
+
+def is_hidden_file(entry):
+    hidden_names = {"desktop.ini", "thumbs.db", "._.ds_store", ".ds_store", ".gitignore", ".gitkeep"}
+    if entry.name.startswith('.') or entry.name.lower() in hidden_names:
+        return True
+    try:
+        import ctypes
+        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(entry.path))
+        if attrs != -1 and attrs & 2:
+            return True
+    except Exception:
+        pass
+    return False
+
+
+# ── FILE LISTING ─────────────────────────────────────────────────────────────
+
+def list_files_and_folders(directory, mode="B", list_option=1, recursive=False,
+                            specific_subfolders=None, ignore_hidden=False, L=None, lang='en'):
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
     output_filename_base = f"{folder_name}{f' ({disk_letter})' if disk_letter else ''}"
@@ -119,20 +188,18 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
                     p.add_run(base)
                     p.add_run(ext)
 
-            # Add credits at the end (small size)
+            # Credits at the bottom
             p_credits = doc.add_paragraph()
-            run = p_credits.add_run(credits_str())
+            run = p_credits.add_run(credits_str)
             try:
                 run.font.size = Pt(8)
             except Exception:
-                # If font sizing fails for any reason, ignore and continue
                 pass
 
             doc.save(output_file_path)
             print(L["list_success"].format(path=output_file_path))
             print(L["list_generated"])
         except Exception as e:
-            # Fallback to TXT if DOCX fails; include credits in TXT
             print(L["docx_failed"].format(err=e))
             output_file_path = os.path.join(directory, f"{output_filename_base}.txt")
             with open(output_file_path, "w", encoding="utf-8") as txt_file:
@@ -162,7 +229,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
             "root": folder_name,
             "files": [os.path.basename(f) for f in files] if list_option in [1, 3] else [],
             "folders": [],
-            "credits": credits_str
+            "credits": credits_str,
         }
         for folder in folders:
             db["folders"].append(folder_to_dict(folder))
@@ -184,6 +251,10 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=False, 
             txt_file.write(f"\n{credits_str}\n")
         print(L["list_success"].format(path=output_file_path))
         print(L["list_generated"])
+
+    # Auto-open the generated file
+    _open_file(output_file_path)
+
 
 def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
     p = doc.add_paragraph("    " * indent)
@@ -210,19 +281,6 @@ def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
         elif entry.is_file() and list_option == 1:
             base, ext = os.path.splitext(entry.name)
             txt_file.write(f"{'    ' * (indent + 1)}{base}{ext}\n")
-
-def is_hidden_file(entry):
-    hidden_names = {"desktop.ini", "thumbs.db", "._.ds_store", ".ds_store", ".gitignore", ".gitkeep"}
-    if entry.name.startswith('.') or entry.name.lower() in hidden_names:
-        return True
-    try:
-        import ctypes
-        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(entry.path))
-        if attrs != -1 and attrs & 2:
-            return True
-    except Exception:
-        pass
-    return False
 
 def create_folders_from_json_cli(json_path, base_dir, L):
     try:
@@ -291,7 +349,9 @@ def run_create_list(L, lang):
         except ValueError:
             print(L["invalid_number"])
 
-    list_files_and_folders(directory_to_list, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, lang=lang)
+    list_files_and_folders(directory_to_list, mode=mode, list_option=list_option,
+                            recursive=True, specific_subfolders=specific_subfolders,
+                            ignore_hidden=ignore_hidden, L=L, lang=lang)
 
 def run_create_folders(L):
     while True:

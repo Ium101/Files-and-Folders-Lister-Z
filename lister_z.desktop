@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Files & Folders Lister Z CLI
-Comment=Command-line interface for listing files and folders
-Exec=python3 /mnt/Disco_Local1/Codes/Files-and-Folders-Lister-Z/lister_z.py
-Icon=terminal
-Terminal=true
-Categories=Utility;FileTools;

@@ -2,24 +2,91 @@ import os
 import re
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
-from docx import Document
-from docx.shared import Pt
-import json
+import configparser
+import subprocess
+from pathlib import Path
+
+# Note: docx is imported inside run_gui() to avoid loading it during --make-icon builds
+
+def _native_file_dialog(title, initialdir, filetypes):
+    """kdialog (KDE) → zenity (GNOME) → tkinter fallback."""
+    kde_filters = " | ".join(f"{lbl} ({pat})" for lbl, pat in filetypes)
+    zenity_filters = []
+    for _, pat in filetypes:
+        for p in pat.split():
+            zenity_filters += ["--file-filter", p]
+    try:
+        if subprocess.run(["which", "kdialog"], capture_output=True).returncode == 0:
+            r = subprocess.run(
+                ["kdialog", "--getopenfilename", str(initialdir), kde_filters, "--title", title],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                p = r.stdout.strip()
+                return p if p and os.path.isfile(p) else None
+            return None
+    except Exception:
+        pass
+    try:
+        if subprocess.run(["which", "zenity"], capture_output=True).returncode == 0:
+            r = subprocess.run(
+                ["zenity", "--file-selection", "--title", title,
+                 "--filename", str(initialdir) + "/"] + zenity_filters,
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                p = r.stdout.strip()
+                return p if p and os.path.isfile(p) else None
+            return None
+    except Exception:
+        pass
+    from tkinter import filedialog as _fd
+    p = _fd.askopenfilename(title=title, initialdir=str(initialdir), filetypes=filetypes)
+    return p if p else None
+
+
+def _native_dir_dialog(title, initialdir=""):
+    """kdialog (KDE) → zenity (GNOME) → tkinter fallback."""
+    start = str(initialdir) if initialdir else os.path.expanduser("~")
+    try:
+        if subprocess.run(["which", "kdialog"], capture_output=True).returncode == 0:
+            r = subprocess.run(
+                ["kdialog", "--getexistingdirectory", start, "--title", title],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                selected = r.stdout.strip()
+                return selected if selected and os.path.isdir(selected) else None
+            return None
+    except Exception:
+        pass
+    try:
+        if subprocess.run(["which", "zenity"], capture_output=True).returncode == 0:
+            r = subprocess.run(
+                ["zenity", "--file-selection", "--directory",
+                 "--title", title, "--filename", start + "/"],
+                capture_output=True, text=True)
+            if r.returncode == 0:
+                p = r.stdout.strip()
+                return p if p and os.path.isdir(p) else None
+            return None
+    except Exception:
+        pass
+    from tkinter import filedialog as _fd
+    p = _fd.askdirectory(title=title, initialdir=start)
+    return p if p else None
+
 
 # Enable DPI awareness for high-resolution displays (Windows only)
 try:
     import ctypes
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
 except Exception:
-    # Not on Windows or DPI awareness already set, continue anyway
     pass
 
 LANGUAGES = {
     "en": {
         "title": "Lister Z",
-        "create_list": "Create a list of files and folders (English)",
-        "create_folders": "Create folder structure from JSON (English)",
-        "open_recent": "Open Recent (English)",
+        "create_list": "Create a list of files and folders",
+        "create_folders": "Create folder structure from JSON",
+        "open_recent": "Open Recent",
         "no_recent_files": "No recent files found.",
         "select_dir": "Select a folder to list.",
         "select_output_dir": "Select the output folder for the results.",
@@ -28,6 +95,7 @@ LANGUAGES = {
         "invalid_mode": "Invalid input. Please enter DOCX/A or TXT/B, or JSON/C.",
         "list_option": "Choose listing option:\n1. Folders and files\n2. Only folders\n3. Only files",
         "filter": "Enter sub-folder names or keywords to filter (comma-separated, case-insensitive), or click OK to include all:",
+        "include_subfolders": "Do you want to include sub-folders in the listing?",
         "hide_hidden": "Do you want to hide system and hidden files (like desktop.ini, .ds_store)?",
         "success": "List generated successfully: {path}",
         "json_success": "JSON database exported: {path}",
@@ -35,18 +103,20 @@ LANGUAGES = {
         "credits": "Made by User Ium101 from GitHub",
         "select_json": "Select the JSON file for folder creation",
         "no_json_selected": "Operation cancelled: No JSON file was selected.",
-        "invalid_json_format": "The selepyinstaller --onefile --windowed lister_z_gui.py ted file is not a valid JSON file. Please choose a file with the correct format.",
+        "invalid_json_format": "The selected file is not a valid JSON file. Please choose a file with the correct format.",
         "select_base_dir": "Select the base folder to create the structure in",
         "no_base_dir_selected": "Operation cancelled: No base folder was selected.",
         "folders_created": "Folder structure created successfully!",
         "error_creating": "Error creating folders",
-        "error": "Error"
+        "error": "Error",
+        "open_btn": "Open",
+        "recent_title": "Recent files",
     },
     "pt": {
         "title": "Lister Z",
-        "create_list": "Criar uma lista de arquivos e pastas (Português)",
-        "create_folders": "Criar estrutura de pastas a partir de JSON (Português)",
-        "open_recent": "Abrir Recente (Português)",
+        "create_list": "Criar uma lista de arquivos e pastas",
+        "create_folders": "Criar estrutura de pastas a partir de JSON",
+        "open_recent": "Abrir Recente",
         "no_recent_files": "Nenhum arquivo recente encontrado.",
         "select_dir": "Selecione uma pasta para listar.",
         "select_output_dir": "Selecione a pasta de saída para os resultados.",
@@ -55,6 +125,7 @@ LANGUAGES = {
         "invalid_mode": "Entrada inválida. Por favor, insira DOCX/A, TXT/B ou JSON/C.",
         "list_option": "Escolha a opção de listagem:\n1. Pastas e arquivos\n2. Apenas pastas\n3. Apenas arquivos",
         "filter": "Digite nomes de subpastas ou palavras-chave para filtrar (separados por vírgula, sem diferenciar maiúsculas/minúsculas), ou clique em OK para incluir todas:",
+        "include_subfolders": "Deseja incluir sub-pastas na listagem?",
         "hide_hidden": "Deseja ocultar arquivos de sistema e ocultos (como desktop.ini, .ds_store)?",
         "success": "Lista gerada com sucesso: {path}",
         "json_success": "Banco de dados JSON exportado: {path}",
@@ -67,25 +138,118 @@ LANGUAGES = {
         "no_base_dir_selected": "Operação cancelada: Nenhuma pasta base foi selecionada.",
         "folders_created": "Estrutura de pastas criada com sucesso!",
         "error_creating": "Erro ao criar pastas",
-        "error": "Erro"
+        "error": "Erro",
+        "open_btn": "Abrir",
+        "recent_title": "Arquivos recentes",
     }
 }
 
+# ── CREDITS FLAG ──────────────────────────────────────────────────────────────
+# Set to True in lister_z_gui.py (the credits version); False here.
+INCLUDE_CREDITS = True
+
 def is_hidden_file(entry):
-    # Cross-platform: check dotfiles and a set of known hidden names, try Windows attributes when available.
     hidden_names = {"desktop.ini", "thumbs.db", "._.ds_store", ".ds_store", ".gitignore", ".gitkeep"}
     if entry.name.startswith('.') or entry.name.lower() in hidden_names:
         return True
     try:
         import ctypes
         attrs = ctypes.windll.kernel32.GetFileAttributesW(str(entry.path))
-        if attrs != -1 and attrs & 2:  # FILE_ATTRIBUTE_HIDDEN
+        if attrs != -1 and attrs & 2:
             return True
     except Exception:
         pass
     return False
 
-def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, specific_subfolders=None, ignore_hidden=False, L=None, parent=None, output_folder=None):
+# ── APP DIRECTORY (works both frozen by PyInstaller and as plain .py) ────────
+def _app_dir() -> str:
+    """Return the folder that contains the exe (frozen) or the script (plain)."""
+    import sys as _sys
+    if getattr(_sys, "frozen", False):
+        return os.path.dirname(_sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+# ── RECENT FILES (plain text, one path per line) ──────────────────────────────
+_MAX_RECENT = 20
+
+def _recent_file_path() -> str:
+    suffix = "windows" if os.name == "nt" else "linux"
+    return os.path.join(_app_dir(), f"lister_z_recent_{suffix}.txt")
+
+
+def _get_recent() -> list:
+    try:
+        with open(_recent_file_path(), "r", encoding="utf-8") as fh:
+            paths = [line.strip() for line in fh if line.strip()]
+        return [p for p in paths if os.path.isfile(p)]
+    except Exception:
+        return []
+
+
+def _add_recent(path: str) -> None:
+    existing = _get_recent()
+    existing = [p for p in existing if p != path]
+    existing.insert(0, path)
+    existing = existing[:_MAX_RECENT]
+    try:
+        with open(_recent_file_path(), "w", encoding="utf-8") as fh:
+            fh.write("\n".join(existing) + "\n")
+    except Exception:
+        pass
+
+
+# ── SETTINGS (.ini) ───────────────────────────────────────────────────────────
+
+def _settings_file_path() -> str:
+    suffix = "windows" if os.name == "nt" else "linux"
+    return os.path.join(_app_dir(), f"lister_z_settings_{suffix}.ini")
+
+
+def _load_settings() -> configparser.ConfigParser:
+    cfg = configparser.ConfigParser()
+    cfg["settings"] = {"language": "en"}
+    try:
+        cfg.read(_settings_file_path(), encoding="utf-8")
+    except Exception:
+        pass
+    return cfg
+
+
+def _load_lang() -> str:
+    return _load_settings().get("settings", "language", fallback="en")
+
+
+def _save_lang(lang: str) -> None:
+    cfg = _load_settings()
+    cfg["settings"]["language"] = lang
+    try:
+        with open(_settings_file_path(), "w", encoding="utf-8") as fh:
+            cfg.write(fh)
+    except Exception:
+        pass
+
+
+# ── OPEN FILE ─────────────────────────────────────────────────────────────────
+
+def _open_file(path):
+    """Open path with the OS default application."""
+    try:
+        if os.name == "nt":
+            os.startfile(path)
+        else:
+            subprocess.Popen(["xdg-open", path])
+    except Exception as exc:
+        messagebox.showerror("Error", str(exc))
+
+
+# ── FILE LISTING ─────────────────────────────────────────────────────────────
+
+def list_files_and_folders(directory, mode="B", list_option=1, recursive=True,
+                            specific_subfolders=None, ignore_hidden=False,
+                            L=None, parent=None, output_folder=None):
+    import json as _json
+
     folder_name = os.path.basename(os.path.normpath(directory))
     disk_letter = os.path.splitdrive(os.path.abspath(directory))[0].replace(":", "")
     output_filename_base = f"{folder_name}{f' ({disk_letter})' if disk_letter else ''}"
@@ -95,25 +259,30 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
         if ignore_hidden and is_hidden_file(entry):
             continue
         if entry.is_dir():
-            if not specific_subfolders or any(re.sub(r'\W+', '', sub).lower() in re.sub(r'\W+', '', entry.name).lower() for sub in specific_subfolders):
+            if not specific_subfolders or any(
+                re.sub(r'\W+', '', sub).lower() in re.sub(r'\W+', '', entry.name).lower()
+                for sub in specific_subfolders
+            ):
                 folders.append(entry.path)
         elif entry.is_file():
             files.append(entry.path)
 
     output_file_ext = 'docx' if mode.upper() == 'A' else ('json' if mode.upper() == 'C' else 'txt')
-    # Use output_folder if provided, otherwise use the source directory
     save_location = output_folder if output_folder else directory
     output_file_path = os.path.join(save_location, f"{output_filename_base}.{output_file_ext}")
-    credits_str = L["credits"] if L else ""
+
+    credits_text = L["credits"] if INCLUDE_CREDITS else None
 
     if mode.upper() == "A":
         try:
+            from docx import Document
+            from docx.shared import Pt
             doc = Document()
             doc.add_heading(f"{folder_name}", level=1)
 
             if list_option in [1, 2]:
                 for folder in folders:
-                    write_folder_structure_docx(doc, folder, list_option=list_option)
+                    write_folder_structure_docx(doc, folder, list_option=list_option, recursive=recursive)
 
             if list_option == 1:
                 for file in files:
@@ -122,19 +291,19 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
                     p.add_run(base).italic = True
                     p.add_run(ext)
 
-            # Add credits in small font size (8pt)
-            p_credits = doc.add_paragraph()
-            run = p_credits.add_run(credits_str)
-            try:
-                run.font.size = Pt(8)
-            except Exception:
-                # If setting font size fails for any reason, ignore it but still save the credits text
-                pass
+            if credits_text:
+                p_credits = doc.add_paragraph()
+                run = p_credits.add_run(credits_text)
+                try:
+                    run.font.size = Pt(8)
+                except Exception:
+                    pass
 
             doc.save(output_file_path)
             messagebox.showinfo(L["title"], L["success"].format(path=output_file_path), parent=parent)
         except Exception as e:
             messagebox.showerror(L["error"], L["docx_error"].format(err=e), parent=parent)
+            return
 
     elif mode.upper() == "C":
         def folder_to_dict(path):
@@ -142,7 +311,7 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
             for entry in os.scandir(path):
                 if entry.is_file():
                     d["files"].append(entry.name)
-                elif entry.is_dir():
+                elif entry.is_dir() and recursive:
                     d["subfolders"].append(folder_to_dict(entry.path))
             return d
 
@@ -150,10 +319,12 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
             "root": folder_name,
             "files": [os.path.basename(f) for f in files if list_option in [1, 3]],
             "folders": [folder_to_dict(f) for f in folders],
-            "credits": credits_str
         }
+        if credits_text:
+            db["credits"] = credits_text
+
         with open(output_file_path, "w", encoding="utf-8") as json_file:
-            json.dump(db, json_file, indent=2, ensure_ascii=False)
+            _json.dump(db, json_file, indent=2, ensure_ascii=False)
         messagebox.showinfo(L["title"], L["json_success"].format(path=output_file_path), parent=parent)
 
     else:  # TXT
@@ -161,56 +332,62 @@ def list_files_and_folders(directory, mode="B", list_option=1, recursive=True, s
             txt_file.write(f"{folder_name}\n\n")
             if list_option in [1, 2]:
                 for folder in folders:
-                    write_folder_structure_txt(txt_file, folder, list_option=list_option)
+                    write_folder_structure_txt(txt_file, folder, list_option=list_option, recursive=recursive)
             if list_option in [1, 3]:
                 for file in files:
                     txt_file.write(f"• {os.path.basename(file)}\n")
-            # Append credits at the end (normal case)
-            txt_file.write(f"\n{credits_str}\n")
+            if credits_text:
+                txt_file.write(f"\n{credits_text}\n")
         messagebox.showinfo(L["title"], L["success"].format(path=output_file_path), parent=parent)
 
-def write_folder_structure_docx(doc, folder, indent=0, list_option=1):
+    # ── Save to recent list and auto-open ────────────────────────────────────
+    _add_recent(output_file_path)
+    _open_file(output_file_path)
+
+
+def write_folder_structure_docx(doc, folder, indent=0, list_option=1, recursive=True):
     p = doc.add_paragraph("    " * indent + "• ")
     p.add_run(os.path.basename(folder)).bold = True
     entries = sorted(os.scandir(folder), key=lambda e: (not e.is_dir(), e.name.lower()))
     for entry in entries:
-        if entry.is_dir():
-            write_folder_structure_docx(doc, entry.path, indent + 1, list_option)
+        if entry.is_dir() and recursive:
+            write_folder_structure_docx(doc, entry.path, indent + 1, list_option, recursive)
         elif entry.is_file() and list_option == 1:
             sub_p = doc.add_paragraph("    " * (indent + 1))
             base, ext = os.path.splitext(entry.name)
             sub_p.add_run(base).italic = True
             sub_p.add_run(ext)
 
-def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1):
+def write_folder_structure_txt(txt_file, folder, indent=0, list_option=1, recursive=True):
     txt_file.write(f"{'    ' * indent}• {os.path.basename(folder)}\n")
     entries = sorted(os.scandir(folder), key=lambda e: (not e.is_dir(), e.name.lower()))
     for entry in entries:
-        if entry.is_dir():
-            write_folder_structure_txt(txt_file, entry.path, indent + 1, list_option)
+        if entry.is_dir() and recursive:
+            write_folder_structure_txt(txt_file, entry.path, indent + 1, list_option, recursive)
         elif entry.is_file() and list_option == 1:
             txt_file.write(f"{'    ' * (indent + 1)}{os.path.basename(entry.name)}\n")
 
 def create_folders_from_json_gui(root, lang_code):
+    import json as _json
     L = LANGUAGES[lang_code]
     root.withdraw()
     while True:
-        json_path = filedialog.askopenfilename(title=L["select_json"], filetypes=[("JSON files", "*.json")], parent=root)
+        json_path = _native_file_dialog(L["select_json"], os.path.expanduser("~"), [("JSON files", "*.json")])
         if not json_path:
             root.deiconify()
             return
         try:
             with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                data = _json.load(f)
             break
-        except json.JSONDecodeError:
+        except _json.JSONDecodeError:
             messagebox.showerror(L["error"], L["invalid_json_format"], parent=root)
         except Exception as e:
             messagebox.showerror(L["error"], f"{L['error_creating']}: {e}", parent=root)
             root.deiconify()
             return
 
-    base_dir = filedialog.askdirectory(title=L["select_base_dir"], parent=root)
+    base_dir = _native_dir_dialog(L["select_base_dir"])
     if not base_dir:
         root.deiconify()
         return
@@ -238,13 +415,12 @@ def create_folders_from_json_gui(root, lang_code):
 def run_lister(root, lang_code):
     L = LANGUAGES[lang_code]
     root.withdraw()
-    directory = filedialog.askdirectory(title=L["select_dir"], parent=root)
+    directory = _native_dir_dialog(L["select_dir"])
     if not directory:
         root.deiconify()
         return
 
-    # Ask for output folder
-    output_folder = filedialog.askdirectory(title=L["select_output_dir"], parent=root)
+    output_folder = _native_dir_dialog(L["select_output_dir"])
     if not output_folder:
         root.deiconify()
         return
@@ -276,195 +452,264 @@ def run_lister(root, lang_code):
         return
     specific_subfolders = [f.strip() for f in filter_input.split(",")] if filter_input else None
 
+    include_subfolders = messagebox.askyesno(L["title"], L["include_subfolders"], parent=root)
     ignore_hidden = messagebox.askyesno(L["title"], L["hide_hidden"], parent=root)
-    list_files_and_folders(directory, mode=mode, list_option=list_option, recursive=True, specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden, L=L, parent=root, output_folder=output_folder)
+    list_files_and_folders(
+        directory, mode=mode, list_option=list_option, recursive=include_subfolders,
+        specific_subfolders=specific_subfolders, ignore_hidden=ignore_hidden,
+        L=L, parent=root, output_folder=output_folder
+    )
     root.deiconify()
+
 
 def open_recent_gui(root, lang_code):
     L = LANGUAGES[lang_code]
-    root.withdraw()
-    
-    recent_files = []
-    try:
-        import os.path
-        home = os.path.expanduser("~")
-        lister_z_dir = os.path.join(home, ".lister_z")
-        recent_file = os.path.join(lister_z_dir, "recent.txt")
-        
-        if os.path.exists(recent_file):
-            with open(recent_file, "r", encoding="utf-8") as f:
-                recent_files = [line.strip() for line in f.readlines() if os.path.exists(line.strip())]
-    except Exception:
-        pass
-    
+
+    recent_files = _get_recent()
+
     if not recent_files:
         messagebox.showinfo(L["title"], L["no_recent_files"], parent=root)
-        root.deiconify()
         return
-    
-    # Create a simple selection dialog
-    from tkinter import Toplevel, Listbox, Scrollbar
-    select_window = Toplevel(root)
-    select_window.title(L["title"])
-    select_window.geometry("400x300")
-    
-    listbox = Listbox(select_window)
-    scrollbar = Scrollbar(select_window)
-    listbox.config(yscrollcommand=scrollbar.set)
-    scrollbar.config(command=listbox.yview)
-    
-    for f in recent_files[:20]:  # Show last 20
-        listbox.insert("end", f)
-    
-    listbox.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-    
-    def open_selected():
-        try:
-            selection = listbox.curselection()
-            if selection:
-                file_path = recent_files[selection[0]]
-                import subprocess
-                os.startfile(file_path) if os.name == 'nt' else subprocess.Popen(['xdg-open', file_path])
-                select_window.destroy()
-        except Exception as e:
-            messagebox.showerror(L["error"], str(e), parent=select_window)
-    
-    tk.Button(select_window, text="Open", command=open_selected).pack(pady=5)
-    root.deiconify()
+
+    from tkinter import Toplevel, Listbox, Scrollbar, END, SINGLE
+
+    win = Toplevel(root)
+    win.title(L["recent_title"])
+    win.geometry("620x320")
+    win.resizable(True, True)
+    win.grab_set()
+    win.configure(bg="white")
+
+    frame = tk.Frame(win, bg="white")
+    frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    sb = Scrollbar(frame)
+    sb.pack(side=tk.RIGHT, fill=tk.Y)
+
+    lb = Listbox(
+        frame,
+        yscrollcommand=sb.set,
+        selectmode=SINGLE,
+        font=("Segoe UI", 10) if os.name == "nt" else ("DejaVu Sans", 10),
+        activestyle="dotbox",
+        bd=0,
+        highlightthickness=1,
+    )
+    lb.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    sb.config(command=lb.yview)
+
+    for path in recent_files:
+        lb.insert(END, path)
+
+    lb.selection_set(0)
+    lb.activate(0)
+
+    def _open():
+        sel = lb.curselection()
+        if not sel:
+            return
+        path = recent_files[sel[0]]
+        if not os.path.isfile(path):
+            messagebox.showerror(
+                L["error"],
+                L["error_dir"].format(directory=path),
+                parent=win,
+            )
+            return
+        _open_file(path)
+        win.destroy()
+
+    lb.bind("<Double-Button-1>", lambda e: _open())
+    lb.bind("<Return>", lambda e: _open())
+
+    btn_frame = tk.Frame(win, bg="white")
+    btn_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+
+    tk.Button(
+        btn_frame,
+        text=L["open_btn"],
+        command=_open,
+        bg="#3498db",
+        fg="white",
+        activebackground="#2980b9",
+        relief=tk.FLAT,
+        bd=0,
+        padx=18,
+        pady=6,
+        cursor="hand2",
+        font=("Segoe UI", 10) if os.name == "nt" else ("DejaVu Sans", 10),
+    ).pack(side=tk.RIGHT)
+
+    win.wait_window()
+
 
 def run_gui():
     root = tk.Tk()
     root.title("Lister Z")
-    root.geometry("595x720")
+    root.geometry("595x430")
     root.configure(bg="white")
-    
-    # Get DPI scaling factor
+    root.resizable(False, False)
+
     try:
-        dpi = root.winfo_fpixels('1i')
-        scale_factor = dpi / 96.0
-    except:
-        scale_factor = 1.0
-    
-    # Configure fonts with scaling
-    button_font = ("Segoe UI", int(11 * scale_factor))
-    credits_font = ("Segoe UI", int(8 * scale_factor))
-    
-    L_en = LANGUAGES["en"]
-    L_pt = LANGUAGES["pt"]
-    
-    # Main content frame
+        dpi = root.winfo_fpixels("1i")
+        scale = dpi / 96.0
+    except Exception:
+        scale = 1.0
+
+    _FONT        = "Segoe UI" if os.name == "nt" else "DejaVu Sans"
+    button_font  = (_FONT, int(11 * scale))
+    toggle_font  = (_FONT, int(10 * scale), "bold")
+    title_font   = (_FONT, int(16 * scale))
+
+    lang_var = tk.StringVar(value=_load_lang())
+
+    # ── Header ────────────────────────────────────────────────────────────────
+    header = tk.Frame(root, bg="#2c3e50", height=int(48 * scale))
+    header.pack(fill=tk.X, side=tk.TOP)
+    header.pack_propagate(False)
+
+    tk.Label(
+        header, text="Lister Z",
+        bg="#2c3e50", fg="white",
+        font=title_font, anchor="w",
+    ).pack(side=tk.LEFT, padx=14)
+
     content_frame = tk.Frame(root, bg="white")
     content_frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
 
-    # Blue buttons - Create list (EN & PT)
-    list_en_btn = tk.Button(
-        content_frame, 
-        text=L_en["create_list"], 
-        command=lambda: run_lister(root, "en"), 
-        height=3,
-        font=button_font,
-        bg="#3498db",
-        fg="white",
-        activebackground="#2980b9",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
-    )
-    list_en_btn.pack(fill=tk.X, padx=0, pady=0)
+    create_list_var   = tk.StringVar()
+    create_folder_var = tk.StringVar()
+    open_recent_var   = tk.StringVar()
 
-    list_pt_btn = tk.Button(
+    _TOGGLE_COLORS = {
+        "pt": ("#27ae60", "#219a52"),
+        "en": ("#e74c3c", "#c0392b"),
+    }
+    _TOGGLE_LABELS = {
+        "pt": "PT-BR",
+        "en": "EN-US",
+    }
+
+    toggle_btn = tk.Button(
         content_frame,
-        text=L_pt["create_list"],
-        command=lambda: run_lister(root, "pt"),
-        height=3,
-        font=button_font,
-        bg="#3498db",
+        text="",
+        height=2,
+        font=toggle_font,
         fg="white",
-        activebackground="#2980b9",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
+        relief=tk.FLAT, bd=0,
+        cursor="hand2",
     )
-    list_pt_btn.pack(fill=tk.X, padx=0, pady=0)
+    toggle_btn.pack(fill=tk.X, padx=0, pady=0)
 
-    # Green buttons - Create folder structure (EN & PT)
-    create_en_btn = tk.Button(
-        content_frame,
-        text=L_en["create_folders"],
-        command=lambda: create_folders_from_json_gui(root, "en"),
-        height=3,
-        font=button_font,
-        bg="#27ae60",
-        fg="white",
-        activebackground="#229954",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
-    )
-    create_en_btn.pack(fill=tk.X, padx=0, pady=0)
+    def _toggle_language():
+        new_lang = "pt" if lang_var.get() == "en" else "en"
+        lang_var.set(new_lang)
+        _save_lang(new_lang)
+        _refresh_ui()
 
-    create_pt_btn = tk.Button(
-        content_frame,
-        text=L_pt["create_folders"],
-        command=lambda: create_folders_from_json_gui(root, "pt"),
-        height=3,
-        font=button_font,
-        bg="#27ae60",
-        fg="white",
-        activebackground="#229954",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
-    )
-    create_pt_btn.pack(fill=tk.X, padx=0, pady=0)
+    toggle_btn.config(command=_toggle_language)
 
-    # Purple buttons - Open Recent (EN & PT)
-    recent_en_btn = tk.Button(
-        content_frame,
-        text=L_en["open_recent"],
-        command=lambda: open_recent_gui(root, "en"),
-        height=3,
-        font=button_font,
-        bg="#9b59b6",
-        fg="white",
-        activebackground="#8e44ad",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
-    )
-    recent_en_btn.pack(fill=tk.X, padx=0, pady=0)
+    def _make_btn(text_var, color, active_color, command):
+        btn = tk.Button(
+            content_frame,
+            textvariable=text_var,
+            command=command,
+            height=3,
+            font=button_font,
+            bg=color, fg="white",
+            activebackground=active_color,
+            relief=tk.FLAT, bd=0,
+            cursor="hand2",
+        )
+        btn.pack(fill=tk.X, padx=0, pady=0)
+        return btn
 
-    recent_pt_btn = tk.Button(
-        content_frame,
-        text=L_pt["open_recent"],
-        command=lambda: open_recent_gui(root, "pt"),
-        height=3,
-        font=button_font,
-        bg="#9b59b6",
-        fg="white",
-        activebackground="#8e44ad",
-        relief=tk.FLAT,
-        bd=0,
-        cursor="hand2"
-    )
-    recent_pt_btn.pack(fill=tk.X, padx=0, pady=0)
+    _make_btn(create_list_var,   "#3498db", "#2980b9", lambda: run_lister(root, lang_var.get()))
+    _make_btn(create_folder_var, "#27ae60", "#229954", lambda: create_folders_from_json_gui(root, lang_var.get()))
+    _make_btn(open_recent_var,   "#9b59b6", "#8e44ad", lambda: open_recent_gui(root, lang_var.get()))
 
-    # Credits frame at the bottom
-    credits_frame = tk.Frame(root, bg="#f5f5f5", height=int(50 * scale_factor))
-    credits_frame.pack(side="bottom", fill=tk.X, padx=0, pady=0)
-    credits_frame.pack_propagate(False)
-    
-    credits_lbl = tk.Label(
-        credits_frame,
-        text=f'{L_pt["credits"]} / {L_en["credits"]}',
-        font=credits_font,
-        bg="#f5f5f5",
-        fg="#999999"
-    )
-    credits_lbl.pack(pady=int(8 * scale_factor))
+    # ── Credits bar (visible only in credits build) ───────────────────────────
+    if INCLUDE_CREDITS:
+        credits_frame = tk.Frame(root, bg="#f5f5f5", height=int(50 * scale))
+        credits_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        credits_frame.pack_propagate(False)
+        credits_lbl = tk.Label(
+            credits_frame, text="",
+            font=(_FONT, int(8 * scale)), bg="#f5f5f5", fg="#999999",
+        )
+        credits_lbl.pack(pady=int(8 * scale))
+    else:
+        credits_lbl = None
 
+    def _refresh_ui():
+        lc = lang_var.get()
+        L  = LANGUAGES[lc]
+        create_list_var.set(L["create_list"])
+        create_folder_var.set(L["create_folders"])
+        open_recent_var.set(L["open_recent"])
+        if credits_lbl:
+            credits_lbl.config(text=L["credits"])
+        bg, abg = _TOGGLE_COLORS[lc]
+        toggle_btn.config(
+            text=_TOGGLE_LABELS[lc],
+            bg=bg,
+            activebackground=abg,
+        )
+
+    _refresh_ui()
     root.mainloop()
 
+# ── EMBEDDED ICON BUILDER ─────────────────────────────────────────────────────
+
+def _build_ico(out_path: str) -> None:
+    """Generate a crisp multi-resolution .ico using Pillow."""
+    from PIL import Image, ImageDraw
+
+    BLUE = (52, 152, 219, 255)
+    SUPERSAMPLE = 1024
+    ICO_SIZES = [16, 24, 32, 48, 64, 128, 256]
+
+    def _draw(size: int) -> "Image.Image":
+        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        s = size / 100.0
+        stroke_w = max(1, round(6 * s))
+        r = stroke_w / 2
+
+        def pt(x, y):
+            return (x * s, y * s)
+
+        outline = [
+            pt(5, 20), pt(5, 85),
+            pt(5.5, 88.5), pt(7, 90), pt(10, 90),
+            pt(90, 90), pt(93, 90), pt(95, 88.5), pt(95, 85),
+            pt(95, 35), pt(95, 32), pt(93, 30), pt(90, 30),
+            pt(50, 30), pt(40, 20), pt(5, 20),
+        ]
+        draw.line(outline, fill=BLUE, width=stroke_w, joint="curve")
+        for x, y in outline:
+            draw.ellipse([x - r, y - r, x + r, y + r], fill=BLUE)
+
+        def rline(x1, y1, x2, y2):
+            p1, p2 = pt(x1, y1), pt(x2, y2)
+            draw.line([p1, p2], fill=BLUE, width=stroke_w)
+            for x, y in (p1, p2):
+                draw.ellipse([x - r, y - r, x + r, y + r], fill=BLUE)
+
+        rline(22, 52, 78, 52)
+        rline(22, 65, 78, 65)
+        rline(22, 78, 60, 78)
+        return img
+
+    base = _draw(SUPERSAMPLE)
+    frames = [base.resize((sz, sz), Image.LANCZOS) for sz in ICO_SIZES]
+    frames[-1].save(out_path, format="ICO", sizes=[(f.width, f.height) for f in frames])
+    print(f"[OK] Wrote {out_path} ({', '.join(str(s) for s in ICO_SIZES)}px)")
+
+
 if __name__ == "__main__":
-    run_gui()
+    import sys as _sys
+    if len(_sys.argv) == 3 and _sys.argv[1] == "--make-icon":
+        _build_ico(_sys.argv[2])
+    else:
+        run_gui()
